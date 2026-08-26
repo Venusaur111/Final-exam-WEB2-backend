@@ -1,6 +1,6 @@
 export interface Exam {
     id: string; // UUID
-    examnumber: number; // Serial
+    examOrderNumber: number; // Serial
     title: string;
     description: string;
     startingDate: string; // Format: Year-Month-Day Hour:Minute

@@ -1,6 +1,6 @@
 export interface Attempt {
     id: string; // UUID
-    attemptnumber: number; // Serial
+    attemptOrderNumber: number; // Serial
     score: number;
     submittedAt: string; // Format: Year-Month-Day Hour:Minute
 }

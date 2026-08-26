@@ -1,6 +1,7 @@
 export interface Question {
     id: string; // UUID
-    questionnumber: number; // Serial
+    questionNumber: number; // Serial
+    correctAnswerIndex: number | null;
     content: string;
     score: number;
 }
