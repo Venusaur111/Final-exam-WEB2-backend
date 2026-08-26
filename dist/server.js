@@ -4,14 +4,11 @@ import { AdminCourseController } from './controllers/admin/adminCourseController
 import { AdminExamController } from './controllers/admin/adminExamController.js';
 import { AdminQuestionController } from './controllers/admin/adminQuestionController.js';
 import { StudentPortalController } from './controllers/student/studentPortalController.js';
-
 const app = express();
 app.use(express.json());
-
-app.use("/api/v1/admin/students", new AdminStudentController(null as any).getRouter());
-app.use("/api/v1/admin/courses", new AdminCourseController(null as any).getRouter());
-app.use("/api/v1/admin/exams", new AdminExamController(null as any, null as any).getRouter());
-app.use("/api/v1/admin/questions", new AdminQuestionController(null as any).getRouter());
-app.use("/api/v1/student", new StudentPortalController(null as any, null as any).getRouter());
-
+app.use("/api/v1/admin/students", new AdminStudentController(null).getRouter());
+app.use("/api/v1/admin/courses", new AdminCourseController(null).getRouter());
+app.use("/api/v1/admin/exams", new AdminExamController(null, null).getRouter());
+app.use("/api/v1/admin/questions", new AdminQuestionController(null).getRouter());
+app.use("/api/v1/student", new StudentPortalController(null, null).getRouter());
 export default app;
