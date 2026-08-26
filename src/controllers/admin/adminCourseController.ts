@@ -31,7 +31,7 @@ export class AdminCourseController {
 
         router.put('/:id', async (req: Request, res: Response) => {
             try {
-                const course = await this.adminCourseService.updateCourse(req.params.id, req.body);
+                const course = await this.adminCourseService.updateCourse(String(req.params.id), req.body);
                 res.json(course);
             } catch (error) {
                 res.status(400).json({ error: 'Update failed' });
@@ -40,7 +40,7 @@ export class AdminCourseController {
 
         router.delete('/:id', async (req: Request, res: Response) => {
             try {
-                await this.adminCourseService.deleteCourse(req.params.id);
+                await this.adminCourseService.deleteCourse(String(req.params.id));
                 res.status(204).send();
             } catch (error) {
                 res.status(400).json({ error: 'Deletion failed' });
