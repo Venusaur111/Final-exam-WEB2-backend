@@ -239,7 +239,7 @@ importers:
         specifier: ^9.0.6
         version: 9.0.10
       '@types/node':
-        specifier: ^20.11.24
+        specifier: ^20.19.43
         version: 20.19.43
       '@types/pg':
         specifier: ^8.11.2
