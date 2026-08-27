@@ -1,9 +1,38 @@
 export interface Exam {
-    id: string; // UUID
-    examOrderNumber: number; // Serial
+    id: string;
+    courseId: string;
     title: string;
-    description: string;
-    startingDate: string; // Format: Year-Month-Day Hour:Minute
-    endingDate: string; // Format: Year-Month-Day Hour:Minute
-    createdAt: string; // Format: Year-Month-Day Hour:Minute
+    description: string | null;
+    startAt: Date;
+    endAt: Date;
+    createdAt: Date;
+}
+
+export interface CreateExamInput {
+    courseId: string;
+    title: string;
+    description?: string;
+    startAt: Date;
+    endAt: Date;
+}
+
+export interface UpdateExamInput {
+    title?: string;
+    description?: string;
+    startAt?: Date;
+    endAt?: Date;
+}
+
+// Ligne agrégée pour GET /api/exams/:id/results
+export interface ExamResultRow {
+    studentId: string;
+    studentName: string;
+    score: number;
+    submittedAt: Date;
+}
+
+export interface ExamResultsSummary {
+    rows: ExamResultRow[];
+    average: number;
+    attemptsCount: number;
 }
