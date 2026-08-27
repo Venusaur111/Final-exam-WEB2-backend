@@ -1,4 +1,4 @@
-import { CourseRepository } from '../../repositories/courseRepository.js';
+import { CourseRepository } from '../../repository/admin/adminCourseRepository.js';
 import { Course } from '../../models/courseModel.js';
 import { CreateCourseDto } from '../../models/dto/createDtoTypes.js'
 

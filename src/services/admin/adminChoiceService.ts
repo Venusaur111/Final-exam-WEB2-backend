@@ -1,4 +1,4 @@
-import { ChoiceRepository } from '../../repositories/choiceRepository.js';
+import { ChoiceRepository } from '../../repository/admin/adminChoiceRepository.js';
 import { Choice } from '../../models/choice.js';
 import { CreateChoiceDto } from '../../models/dto/createDtoTypes.js'
 export class AdminChoiceService {
@@ -9,7 +9,7 @@ export class AdminChoiceService {
     }
 
     public async addChoice(questionId: string, dto: CreateChoiceDto): Promise<Choice> {
-        return this.choiceRepository.insert(questionId, dto);
+        return this.choiceRepository.insert(questionId, dto.content);
     }
 
     public async updateChoiceContent(id: string, content: string): Promise<Choice> {

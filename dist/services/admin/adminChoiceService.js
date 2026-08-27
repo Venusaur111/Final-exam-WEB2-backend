@@ -4,7 +4,7 @@ export class AdminChoiceService {
         this.choiceRepository = choiceRepository;
     }
     async addChoice(questionId, dto) {
-        return this.choiceRepository.insert(questionId, dto);
+        return this.choiceRepository.insert(questionId, dto.content);
     }
     async updateChoiceContent(id, content) {
         return this.choiceRepository.updateContent(id, content);

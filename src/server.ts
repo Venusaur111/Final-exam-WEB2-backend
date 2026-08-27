@@ -8,10 +8,17 @@ import { StudentPortalController } from './controllers/student/studentPortalCont
 const app = express();
 app.use(express.json());
 
-app.use("/api/v1/admin/students", new AdminStudentController(null as any).getRouter());
-app.use("/api/v1/admin/courses", new AdminCourseController(null as any).getRouter());
-app.use("/api/v1/admin/exams", new AdminExamController(null as any, null as any).getRouter());
-app.use("/api/v1/admin/questions", new AdminQuestionController(null as any).getRouter());
-app.use("/api/v1/student", new StudentPortalController(null as any, null as any).getRouter());
+const PORT = process.env.PORT || 3001;
+
+// Les objets s'instancient d'eux-mêmes en cascade
+app.use("/api/v1/admin/students", new AdminStudentController().getRouter());
+app.use("/api/v1/admin/courses", new AdminCourseController().getRouter());
+app.use("/api/v1/admin/exams", new AdminExamController().getRouter());
+app.use("/api/v1/admin/questions", new AdminQuestionController().getRouter());
+app.use("/api/v1/student", new StudentPortalController().getRouter());
+
+app.listen(PORT, () => {
+    console.log(`Server started on port ${PORT}`);
+});
 
 export default app;

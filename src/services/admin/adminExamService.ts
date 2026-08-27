@@ -1,4 +1,4 @@
-import { ExamRepository } from '../../repositories/examRepository.js';
+import { ExamRepository } from '../../repository/admin/adminExamRepository.js';
 import { Exam } from '../../models/examModel.js';
 import { Attempt } from '../../models/attempt.js';
 import { CreateExamDto } from '../../models/dto/createDtoTypes.js';

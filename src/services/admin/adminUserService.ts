@@ -1,13 +1,14 @@
-import { UserRepository } from '../../Repository/admin/adminUserReposiroie.js';
-import { User} from '../../models/userModel.js';
-import {CreateUserDto} from '../../models/dto/createDtoTypes.js';
+import { UserRepository } from '../../repository/admin/adminUserRepository.js';
+import { User } from '../../models/userModel.js';
+import { CreateUserDto } from '../../models/dto/createDtoTypes.js';
 
 export class AdminUserService {
     private userRepository: UserRepository;
 
-    constructor(userRepository: UserRepository) {
+    constructor(userRepository: UserRepository = new UserRepository()) {
         this.userRepository = userRepository;
     }
+
     public async registerStudent(dto: CreateUserDto): Promise<User> {
         return this.userRepository.insertStudent(dto);
     }
@@ -31,16 +32,4 @@ export class AdminUserService {
     public async getStudentById(id: string): Promise<User | null> {
         return this.userRepository.findStudentById(id);
     }
-/*
-    public async updateStudentFirstName(id: string, firstName: string): Promise<User> {
-        return this.userRepository.updateField(id, 'first_name', firstName);
-    }
-
-    public async updateStudentLastName(id: string, lastName: string): Promise<User> {
-        return this.userRepository.updateField(id, 'last_name', lastName);
-    }
-
-    public async updateStudentNumber(id: string, userNumber: number): Promise<User> {
-        return this.userRepository.updateField(id, 'user_number', userNumber);
-    }*/
 }

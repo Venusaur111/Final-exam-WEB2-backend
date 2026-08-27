@@ -1,7 +1,8 @@
 import { Router } from 'express';
+import { AdminUserService } from '../../services/admin/adminUserService.js';
 export class AdminStudentController {
     adminUserService;
-    constructor(adminUserService) {
+    constructor(adminUserService = new AdminUserService()) {
         this.adminUserService = adminUserService;
     }
     getRouter() {

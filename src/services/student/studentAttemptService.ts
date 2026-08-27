@@ -1,4 +1,4 @@
-import { AttemptRepository } from '../../repositories/attemptRepository.js';
+import { AttemptRepository } from '../../repository/admin/attemptRepository.js';
 import { Attempt } from '../../models/attempt.js';
 import { StudentQuestionService } from './studentQuestionService.js';
 

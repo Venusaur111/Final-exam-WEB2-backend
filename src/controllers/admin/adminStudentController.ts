@@ -4,7 +4,7 @@ import { AdminUserService } from '../../services/admin/adminUserService.js';
 export class AdminStudentController {
     private adminUserService: AdminUserService;
 
-    constructor(adminUserService: AdminUserService) {
+    constructor(adminUserService: AdminUserService = new AdminUserService()) {
         this.adminUserService = adminUserService;
     }
 

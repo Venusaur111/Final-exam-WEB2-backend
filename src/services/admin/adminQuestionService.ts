@@ -1,4 +1,4 @@
-import { QuestionRepository } from '../../repositories/questionRepository.js';
+import { QuestionRepository } from '../../repository/admin/adminQuestionRepository.js';
 import { Question } from '../../models/questionModel.js';
 import { CreateQuestionDto } from '../../models/dto/createDtoTypes.js';
 

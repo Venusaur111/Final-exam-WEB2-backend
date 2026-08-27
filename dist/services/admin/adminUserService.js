@@ -1,6 +1,7 @@
+import { UserRepository } from '../../repository/admin/adminUserRepository.js';
 export class AdminUserService {
     userRepository;
-    constructor(userRepository) {
+    constructor(userRepository = new UserRepository()) {
         this.userRepository = userRepository;
     }
     async registerStudent(dto) {
@@ -20,14 +21,5 @@ export class AdminUserService {
     }
     async getStudentById(id) {
         return this.userRepository.findStudentById(id);
-    }
-    async updateStudentFirstName(id, firstName) {
-        return this.userRepository.updateField(id, 'first_name', firstName);
-    }
-    async updateStudentLastName(id, lastName) {
-        return this.userRepository.updateField(id, 'last_name', lastName);
-    }
-    async updateStudentNumber(id, userNumber) {
-        return this.userRepository.updateField(id, 'user_number', userNumber);
     }
 }
