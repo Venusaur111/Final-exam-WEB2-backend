@@ -1,6 +1,7 @@
 import { ExamRepository } from '../../repositories/examRepository.js';
-import { Exam, CreateExamDto } from '../../models/examModel.js';
+import { Exam } from '../../models/examModel.js';
 import { Attempt } from '../../models/attempt.js';
+import { CreateExamDto } from '../../models/dto/createDtoTypes.js';
 
 export class AdminExamService {
     private examRepository: ExamRepository;

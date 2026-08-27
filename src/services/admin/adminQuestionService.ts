@@ -1,5 +1,6 @@
 import { QuestionRepository } from '../../repositories/questionRepository.js';
-import { Question, CreateQuestionDto } from '../../models/questionModel.js';
+import { Question } from '../../models/questionModel.js';
+import { CreateQuestionDto } from '../../models/dto/createDtoTypes.js';
 
 export class AdminQuestionService {
     private questionRepository: QuestionRepository;

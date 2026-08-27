@@ -1,5 +1,6 @@
 import { UserRepository } from '../../repository/userRepository.js';
-import { User, CreateUserDto } from '../../models/userModel.js';
+import { User } from '../../models/userModel.js';
+import { CreateUserDto } from '../../models/dto/createDtoTypes.js';
 
 export class AdminUserService {
     private userRepository: UserRepository;
