@@ -1,7 +1,6 @@
 src/
 ├── server.ts
 ├── models/
-│   ├── index.ts
 │   ├── courseModel.ts
 │   ├── examModel.ts
 │   ├── questionModel.ts

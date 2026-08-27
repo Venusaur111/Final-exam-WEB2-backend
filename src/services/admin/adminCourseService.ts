@@ -1,5 +1,6 @@
 import { CourseRepository } from '../../repositories/courseRepository.js';
-import { Course, CreateCourseDto } from '../../models/courseModel.js';
+import { Course } from '../../models/courseModel.js';
+import { CreateCourseDto } from '../../models/dto/createDtoTypes.js'
 
 export class AdminCourseService {
     private courseRepository: CourseRepository;

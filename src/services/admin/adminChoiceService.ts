@@ -1,6 +1,6 @@
 import { ChoiceRepository } from '../../repositories/choiceRepository.js';
-import { Choice, CreateChoiceDto } from '../../models/choiceModel.js';
-
+import { Choice } from '../../models/choice.js';
+import { CreateChoiceDto } from '../../models/dto/createDtoTypes.js'
 export class AdminChoiceService {
     private choiceRepository: ChoiceRepository;
 
