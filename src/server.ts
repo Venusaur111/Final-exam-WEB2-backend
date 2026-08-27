@@ -1,17 +1,23 @@
-import express from 'express';
-import { AdminStudentController } from './controllers/admin/adminStudentController.js';
-import { AdminCourseController } from './controllers/admin/adminCourseController.js';
-import { AdminExamController } from './controllers/admin/adminExamController.js';
-import { AdminQuestionController } from './controllers/admin/adminQuestionController.js';
-import { StudentPortalController } from './controllers/student/studentPortalController.js';
-
+import express from "express";
+import { UserRepository } from "./Repository/userrepo.js";
+import { AdminUserService } from "./services/userserv.js";
+import { UserController } from "./controllers/usercontroller.js";
 const app = express();
+
 app.use(express.json());
 
-app.use("/api/v1/admin/students", new AdminStudentController(null as any).getRouter());
-app.use("/api/v1/admin/courses", new AdminCourseController(null as any).getRouter());
-app.use("/api/v1/admin/exams", new AdminExamController(null as any, null as any).getRouter());
-app.use("/api/v1/admin/questions", new AdminQuestionController(null as any).getRouter());
-app.use("/api/v1/student", new StudentPortalController(null as any, null as any).getRouter());
+const userRepository = new UserRepository();
+const userService = new AdminUserService(userRepository);
+const userController = new UserController(userService);
 
-export default app;
+
+
+
+app.get("/api/v1/admin/students", async (req: Request, res: Response) => {
+    await userController.getStudentById(req, res);
+});
+
+
+app.listen(3000, () => {
+    console.log("Serveur démarré sur http://localhost:3000");
+});
