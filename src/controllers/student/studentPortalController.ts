@@ -1,21 +1,21 @@
 import { Router, Request, Response } from 'express';
 import { StudentExamService } from '../../services/student/studentExamService.js';
 import { StudentAttemptService } from '../../services/student/studentAttemptService.js';
+import { AdminUserService } from '../../services/admin/adminUserService.js';
 
 export class StudentPortalController {
     private studentExamService: StudentExamService;
     private studentAttemptService: StudentAttemptService;
-
     constructor(
         studentExamService: StudentExamService,
-        studentAttemptService: StudentAttemptService
+        studentAttemptService: StudentAttemptService,
     ) {
         this.studentExamService = studentExamService;
         this.studentAttemptService = studentAttemptService;
     }
+    
     public getRouter(): Router {
         const router = Router();
-
         router.get('/exams', async (req: Request, res: Response) => {
             try {
                 const exams = await this.studentExamService.findAvailableExams();
@@ -24,6 +24,7 @@ export class StudentPortalController {
                 res.status(500).json({ error: 'Internal server error' });
             }
         });
+       
 
         router.get('/exams/:id', async (req: Request, res: Response) => {
             try {
