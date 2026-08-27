@@ -1,6 +1,6 @@
 export interface Course {
     id: string; // UUID
-    courseOrderNumber: number; // Serial
+    courseOrderNumber: number; // Serial number of the course
     courseCode: string;
     name: string;
     description: string;
