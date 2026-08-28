@@ -1,0 +1,332 @@
+openapi: 3.0.3
+info:
+  title: Exam Manager API
+  version: 1.0.0
+servers:
+  - url: http://localhost:3000/api
+paths:
+  /auth/login:
+    post:
+      summary: User authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '200':
+          description: Successful login with access token
+
+  /students:
+    get:
+      summary: Administrator only - List all students
+      responses:
+        '200':
+          description: Success
+    post:
+      summary: Administrator only - Register a student
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUserDto'
+      responses:
+        '201':
+          description: Student created
+
+  /students/{id}:
+    put:
+      summary: Administrator only - Update a student
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Updated
+    delete:
+      summary: Administrator only - Deactivate a student
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Deactivated
+
+  /courses:
+    get:
+      summary: Administrator only - List all courses
+      responses:
+        '200':
+          description: Success
+    post:
+      summary: Administrator only - Create a course
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCourseDto'
+      responses:
+        '201':
+          description: Course created
+
+  /courses/{id}:
+    put:
+      summary: Administrator only - Update a course
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Updated
+    delete:
+      summary: Administrator only - Delete a course
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Deleted
+
+  /exams:
+    get:
+      summary: Administrator only - List all exams
+      responses:
+        '200':
+          description: Success
+    post:
+      summary: Administrator only - Create an exam
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateExamDto'
+      responses:
+        '201':
+          description: Exam created
+
+  /exams/{id}:
+    get:
+      summary: Administrator only - Get exam details
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Success
+    put:
+      summary: Administrator only - Update an exam
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Updated
+    delete:
+      summary: Administrator only - Delete an exam
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Deleted
+
+  /exams/{id}/questions:
+    get:
+      summary: Administrator only - List questions for an exam
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Success
+    post:
+      summary: Administrator only - Add a question (with nested choices)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateQuestionDto'
+      responses:
+        '201':
+          description: Question added
+
+  /questions/{id}:
+    put:
+      summary: Administrator only - Update a question
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Updated
+    delete:
+      summary: Administrator only - Delete a question
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Deleted
+
+  /exams/{id}/results:
+    get:
+      summary: Administrator only - Get exam results
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Success
+
+  /my/exams:
+    get:
+      summary: Student only - List available exams
+      responses:
+        '200':
+          description: Success
+
+  /my/exams/{id}:
+    get:
+      summary: Student only - Get details of an available exam
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Success
+
+  /my/exams/{id}/submit:
+    post:
+      summary: Student only - Submit exam answers
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                answers:
+                  type: array
+                  items:
+                    type: object
+      responses:
+        '201':
+          description: Submission recorded
+
+  /my/results:
+    get:
+      summary: Student only - Get personal results
+      responses:
+        '200':
+          description: Success
+
+components:
+  schemas:
+    CreateUserDto:
+      type: object
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+        firstName:
+          type: string
+        name:
+          type: string
+        role:
+          type: string
+
+    CreateCourseDto:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+
+    CreateExamDto:
+      type: object
+      properties:
+        title:
+          type: string
+        courseId:
+          type: string
+
+    CreateQuestionDto:
+      type: object
+      properties:
+        content:
+          type: string
+        choices:
+          type: array
+          items:
+            type: object
+            properties:
+              content:
+                type: string
+              isCorrect:
+                type: boolean
