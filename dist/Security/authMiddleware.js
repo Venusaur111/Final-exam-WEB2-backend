@@ -3,14 +3,14 @@ export function authMiddleware(req, res, next) {
     const authorization = req.headers.authorization;
     if (!authorization) {
         res.status(401).json({
-            message: "Token manquant"
+            message: "Missing token"
         });
         return;
     }
     const parts = authorization.split(" ");
     if (parts.length !== 2 || parts[0] !== "Bearer") {
         res.status(401).json({
-            message: "Format du token invalide"
+            message: "Invalid token format"
         });
         return;
     }
@@ -18,7 +18,7 @@ export function authMiddleware(req, res, next) {
     const secret = process.env.JWT_SECRET;
     if (!secret) {
         res.status(500).json({
-            message: "JWT_SECRET non configuré"
+            message: "JWT_SECRET not configured"
         });
         return;
     }
@@ -29,7 +29,7 @@ export function authMiddleware(req, res, next) {
     }
     catch (error) {
         res.status(401).json({
-            message: "Token invalide ou expiré"
+            message: "Invalid or expired token"
         });
     }
 }

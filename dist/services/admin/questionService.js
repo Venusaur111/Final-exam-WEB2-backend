@@ -1,5 +1,6 @@
-import { QuestionRepository } from "../../Repository/admin/adminQuestionRepositories.js"; // Adaptez le chemin
-import { ExamRepository } from "../../Repository/admin/adminExamRepositories.js"; // Pour vérifier RG-08 (tentatives)
+// questionService.ts
+import { QuestionRepository } from "../../Repository/admin/adminQuestionRepositories.js";
+import { ExamRepository } from "../../Repository/admin/adminExamRepositories.js";
 export class QuestionService {
     questionRepo;
     examRepo;
@@ -9,69 +10,69 @@ export class QuestionService {
     }
     async getQuestionsByExam(examId) {
         if (!examId)
-            throw new Error("L'identifiant de l'examen est requis.");
+            throw new Error("Exam identifier is required.");
         return await this.questionRepo.findByExam(examId);
     }
     async createQuestion(examId, data) {
         if (!examId)
-            throw new Error("L'identifiant de l'examen est requis.");
+            throw new Error("Exam identifier is required.");
         if (!data.statement || data.statement.trim() === "") {
-            throw new Error("L'énoncé de la question est requis.");
+            throw new Error("Question statement is required.");
         }
         if (!data.points || data.points <= 0) {
-            throw new Error("Le nombre de points doit être supérieur à 0.");
+            throw new Error("The number of points must be greater than 0.");
         }
-        // Validation des choix (RG-04 : Au moins 2 choix, au moins 1 correct)
+        // Choice validation (RG-04: At least 2 choices, at least 1 correct)
         this.validateChoicesInput(data.choices);
-        // RG-08 : Impossible d'ajouter des questions si l'examen a déjà des tentatives
+        // RG-08: Cannot add questions if the exam already has attempts
         const hasAttempts = await this.examRepo.hasAttempts(examId);
         if (hasAttempts) {
-            throw new Error("Impossible de modifier ou d'ajouter une question : l'examen contient déjà des tentatives.");
+            throw new Error("Cannot modify or add a question: the exam already contains attempts.");
         }
         return await this.questionRepo.createWithChoices(examId, data);
     }
     async updateQuestion(questionId, data) {
         if (!questionId)
-            throw new Error("L'identifiant de la question est requis.");
+            throw new Error("Question identifier is required.");
         const existingQuestion = await this.questionRepo.findById(questionId);
         if (!existingQuestion)
-            throw new Error("Question introuvable.");
-        // RG-08 : Verrouillage si des étudiants ont déjà passé l'examen
+            throw new Error("Question not found.");
+        // RG-08: Lock if students have already taken the exam
         const hasAttempts = await this.examRepo.hasAttempts(existingQuestion.examId);
         if (hasAttempts) {
-            throw new Error("Modification impossible : des étudiants ont déjà passé cet examen.");
+            throw new Error("Modification impossible: students have already taken this exam.");
         }
         if (data.points !== undefined && data.points <= 0) {
-            throw new Error("Le nombre de points doit être supérieur à 0.");
+            throw new Error("The number of points must be greater than 0.");
         }
         if (data.choices) {
             this.validateChoicesInput(data.choices);
         }
         const updated = await this.questionRepo.update(questionId, data);
         if (!updated)
-            throw new Error("Erreur lors de la mise à jour de la question.");
+            throw new Error("Error updating the question.");
         return updated;
     }
     async deleteQuestion(questionId) {
         if (!questionId)
-            throw new Error("L'identifiant de la question est requis.");
+            throw new Error("Question identifier is required.");
         const examId = await this.questionRepo.getExamIdForQuestion(questionId);
         if (!examId)
-            throw new Error("Question introuvable.");
-        // RG-08 : Verrouillage suppression
+            throw new Error("Question not found.");
+        // RG-08: Deletion lock
         const hasAttempts = await this.examRepo.hasAttempts(examId);
         if (hasAttempts) {
-            throw new Error("Suppression impossible : des étudiants ont déjà passé cet examen.");
+            throw new Error("Deletion impossible: students have already taken this exam.");
         }
         await this.questionRepo.delete(questionId);
     }
     validateChoicesInput(choices) {
         if (!choices || choices.length < 2) {
-            throw new Error("Une question doit comporter au moins 2 choix de réponse.");
+            throw new Error("A question must have at least 2 response choices.");
         }
         const hasCorrect = choices.some((c) => c.isCorrect === true);
         if (!hasCorrect) {
-            throw new Error("Au moins un des choix de réponse doit être marqué comme correct.");
+            throw new Error("At least one response choice must be marked as correct.");
         }
     }
 }

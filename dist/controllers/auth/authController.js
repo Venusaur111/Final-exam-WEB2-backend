@@ -1,4 +1,4 @@
-import { AuthService } from "../../services/auth/authService.js"; // Adapte le chemin selon ton projet
+import { AuthService } from "../../services/auth/authService.js";
 export class AuthController {
     authService;
     constructor() {
@@ -6,7 +6,7 @@ export class AuthController {
     }
     /**
      * POST /api/auth/login
-     * Authentification utilisateur et génération du JWT
+     * User authentication and JWT generation
      */
     login = async (req, res) => {
         try {
@@ -14,7 +14,7 @@ export class AuthController {
             if (!email || !password) {
                 res.status(400).json({
                     success: false,
-                    message: "Veuillez fournir un email et un mot de passe."
+                    message: "Please provide an email and a password."
                 });
                 return;
             }
@@ -22,11 +22,11 @@ export class AuthController {
             res.status(200).json({ success: true, data: result });
         }
         catch (error) {
-            if (error.message === "Identifiants invalides.") {
+            if (error.message === "Invalid credentials.") {
                 res.status(401).json({ success: false, message: error.message });
                 return;
             }
-            if (error.message === "Ce compte a été désactivé.") {
+            if (error.message === "This account has been deactivated.") {
                 res.status(403).json({ success: false, message: error.message });
                 return;
             }

@@ -1,3 +1,4 @@
+// questionRepository.ts
 import { pool } from "../../config/database.js";
 import {
     Question,
@@ -9,12 +10,12 @@ import {
 import { Choice } from "../../models/choice.js";
 
 export class QuestionRepository {
-    async findByExam(examId: string): Promise<QuestionWithChoices[]> {
+    async findByExam(examId: string): Promise<readonly QuestionWithChoices[]> {
         const result = await pool.query(
             `SELECT q.id, q.exam_id AS "examId", q.statement, q.points, q.created_at AS "createdAt",
                     c.id AS "choiceId", c.label AS "choiceLabel", c.is_correct AS "choiceIsCorrect"
              FROM questions q
-             LEFT JOIN choices c ON c.question_id = q.id
+                      LEFT JOIN choices c ON c.question_id = q.id
              WHERE q.exam_id = $1
              ORDER BY q.created_at, c.label`,
             [examId]
@@ -22,13 +23,13 @@ export class QuestionRepository {
         return this.groupAdminRows(result.rows);
     }
 
-    async findByExamForStudent(examId: string): Promise<QuestionForStudent[]> {
-        // RG-07 : is_correct n'est jamais sélectionné ici
+    async findByExamForStudent(examId: string): Promise<readonly QuestionForStudent[]> {
+        // RG-07: is_correct is never selected here
         const result = await pool.query(
             `SELECT q.id, q.statement, q.points,
                     c.id AS "choiceId", c.label AS "choiceLabel"
              FROM questions q
-             LEFT JOIN choices c ON c.question_id = q.id
+                      LEFT JOIN choices c ON c.question_id = q.id
              WHERE q.exam_id = $1
              ORDER BY q.created_at, c.label`,
             [examId]
@@ -41,7 +42,7 @@ export class QuestionRepository {
             `SELECT q.id, q.exam_id AS "examId", q.statement, q.points, q.created_at AS "createdAt",
                     c.id AS "choiceId", c.label AS "choiceLabel", c.is_correct AS "choiceIsCorrect"
              FROM questions q
-             LEFT JOIN choices c ON c.question_id = q.id
+                      LEFT JOIN choices c ON c.question_id = q.id
              WHERE q.id = $1
              ORDER BY c.label`,
             [id]
@@ -58,8 +59,8 @@ export class QuestionRepository {
         return result.rows[0]?.examId ?? null;
     }
 
-    // Transaction : question + choix insérés ensemble.
-    // Le trigger RG-04 (choices) est vérifié au COMMIT.
+    // Transaction: question + choices inserted together.
+    // The RG-04 trigger (choices) is verified at COMMIT.
     async createWithChoices(examId: string, data: CreateQuestionInput): Promise<QuestionWithChoices> {
         const client = await pool.connect();
         try {
@@ -68,7 +69,7 @@ export class QuestionRepository {
             const questionResult = await client.query(
                 `INSERT INTO questions (exam_id, statement, points)
                  VALUES ($1, $2, $3)
-                 RETURNING id, exam_id AS "examId", statement, points, created_at AS "createdAt"`,
+                     RETURNING id, exam_id AS "examId", statement, points, created_at AS "createdAt"`,
                 [examId, data.statement, data.points]
             );
             const question: Question = questionResult.rows[0];
@@ -78,7 +79,7 @@ export class QuestionRepository {
                 const choiceResult = await client.query(
                     `INSERT INTO choices (question_id, label, is_correct)
                      VALUES ($1, $2, $3)
-                     RETURNING id, question_id AS "questionId", label, is_correct AS "isCorrect"`,
+                         RETURNING id, question_id AS "questionId", label, is_correct AS "isCorrect"`,
                     [question.id, choiceInput.label, choiceInput.isCorrect]
                 );
                 choices.push(choiceResult.rows[0]);
@@ -94,8 +95,8 @@ export class QuestionRepository {
         }
     }
 
-    // Remplace intégralement les choix si fournis. Le verrouillage RG-08
-    // (examen avec tentatives) est vérifié en amont, côté Service.
+    // Completely replaces choices if provided. The RG-08 lock
+    // (exam with attempts) is checked upstream on the Service side.
     async update(id: string, data: UpdateQuestionInput): Promise<QuestionWithChoices | null> {
         const client = await pool.connect();
         try {
@@ -130,12 +131,12 @@ export class QuestionRepository {
         }
     }
 
-    // Verrouillage RG-08 vérifié côté Service avant l'appel.
+    // RG-08 lock verified on Service side before call.
     async delete(id: string): Promise<void> {
         await pool.query(`DELETE FROM questions WHERE id = $1`, [id]);
     }
 
-    private groupAdminRows(rows: any[]): QuestionWithChoices[] {
+    private groupAdminRows(rows: readonly any[]): readonly QuestionWithChoices[] {
         const map = new Map<string, QuestionWithChoices>();
         for (const row of rows) {
             if (!map.has(row.id)) {
@@ -149,7 +150,7 @@ export class QuestionRepository {
                 });
             }
             if (row.choiceId) {
-                map.get(row.id)!.choices.push({
+                (map.get(row.id)!.choices as Choice[]).push({
                     id: row.choiceId,
                     questionId: row.id,
                     label: row.choiceLabel,
@@ -160,7 +161,7 @@ export class QuestionRepository {
         return Array.from(map.values());
     }
 
-    private groupStudentRows(rows: any[]): QuestionForStudent[] {
+    private groupStudentRows(rows: readonly any[]): readonly QuestionForStudent[] {
         const map = new Map<string, QuestionForStudent>();
         for (const row of rows) {
             if (!map.has(row.id)) {
@@ -172,7 +173,7 @@ export class QuestionRepository {
                 });
             }
             if (row.choiceId) {
-                map.get(row.id)!.choices.push({
+                (map.get(row.id)!.choices as any[]).push({
                     id: row.choiceId,
                     questionId: row.id,
                     label: row.choiceLabel,

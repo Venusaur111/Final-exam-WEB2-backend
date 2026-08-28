@@ -1,3 +1,4 @@
+// studentExamService.ts
 import { StudentExamRepository } from "../../Repository/student/studentExamRepositories.js";
 import { SubmitAnswerInput } from "../../models/attempt.js";
 import { Exam } from "../../models/examModel.js";
@@ -12,90 +13,92 @@ export class StudentExamService {
     }
 
     /**
-     * RG-02 + RG-03 : Liste des examens dont la fenêtre est ouverte et non tentés.
+     * RG-02 + RG-03: List of exams with open window and not attempted[cite: 20].
      */
-    async getAvailableExams(studentId: string): Promise<Exam[]> {
+    async getAvailableExams(studentId: string): Promise<readonly Exam[]> {
         if (!studentId) {
-            throw new Error("L'identifiant de l'étudiant est requis.");
+            throw new Error("Student identifier is required.");
         }
         return await this.repo.findAvailableExams(studentId);
     }
 
     /**
-     * RG-07 : Récupère les questions d'un examen sans exposer la bonne réponse (is_correct).
+     * RG-07: Retrieves exam questions without exposing the correct answer (is_correct)[cite: 20].
      */
-    async getExamQuestions(examId: string, studentId: string): Promise<QuestionForStudent[]> {
+    async getExamQuestions(examId: string, studentId: string): Promise<readonly QuestionForStudent[]> {
         const exam = await this.repo.findExamById(examId);
         if (!exam) {
-            throw new Error("Examen introuvable.");
+            throw new Error("Exam not found.");
         }
 
-        // RG-03 : Vérification de la fenêtre de disponibilité
+        // RG-03: Check availability window[cite: 20]
         const isOpen = await this.repo.isWithinWindow(examId);
         if (!isOpen) {
-            throw new Error("Cet examen n'est pas accessible actuellement.");
+            throw new Error("This exam is not currently accessible.");
         }
 
-        // RG-02 : Vérification qu'aucune tentative n'a déjà été effectuée
+        // RG-02: Check that no attempt has already been made[cite: 20]
         const alreadyAttempted = await this.repo.hasAttempt(examId, studentId);
         if (alreadyAttempted) {
-            throw new Error("Vous avez déjà soumis une tentative pour cet examen.");
+            throw new Error("You have already submitted an attempt for this exam.");
         }
 
         return await this.repo.getQuestionsForStudent(examId);
     }
 
     /**
-     * RG-02 + RG-05 + RG-06 : Soumission de l'examen et calcul du score côté serveur.
+     * RG-02 + RG-05 + RG-06: Exam submission and server-side score calculation[cite: 20].
      */
     async submitExam(
         examId: string,
         studentId: string,
-        answers: SubmitAnswerInput[]
+        answers: readonly SubmitAnswerInput[]
     ): Promise<ExamCorrection> {
         const exam = await this.repo.findExamById(examId);
         if (!exam) {
-            throw new Error("Examen introuvable.");
+            throw new Error("Exam not found.");
         }
 
-        // Vérification de la fenêtre temporelle lors de la soumission
+        // Check time window upon submission[cite: 20]
         const isOpen = await this.repo.isWithinWindow(examId);
         if (!isOpen) {
-            throw new Error("La période de soumission pour cet examen est expirée.");
+            throw new Error("The submission period for this exam has expired.");
         }
 
-        // Vérification unicité de la tentative
+        // Check attempt uniqueness[cite: 20]
         const alreadyAttempted = await this.repo.hasAttempt(examId, studentId);
         if (alreadyAttempted) {
-            throw new Error("Vous avez déjà passé cet examen.");
+            throw new Error("You have already taken this exam.");
         }
 
-        // La transaction et le calcul du score (RG-06) sont délégués au repository
+        // Transaction and score calculation (RG-06) are delegated to the repository[cite: 20]
         return await this.repo.submitExam(examId, studentId, answers);
     }
 
     /**
-     * Historique des résultats de l'étudiant connecté.
+     * History of results for the logged-in student[cite: 20].
      */
-    async getMyResults(studentId: string) {
+    async getMyResults(studentId: string): Promise<
+        readonly { readonly attemptId: string; readonly examId: string; readonly examTitle: string; readonly score: number; readonly submittedAt: Date }[]
+    > {
         if (!studentId) {
-            throw new Error("L'identifiant de l'étudiant est requis.");
+            throw new Error("Student identifier is required.");
         }
         return await this.repo.findMyResults(studentId);
     }
 
     /**
-     * Consultation de la correction détaillée d'une tentative.
+     * View detailed correction of an attempt[cite: 20].
      */
     async getCorrectionForAttempt(attemptId: string, studentId: string): Promise<ExamCorrection> {
         if (!attemptId || !studentId) {
-            throw new Error("Identifiants manquants.");
+            throw new Error("Missing identifiers.");
         }
 
         const correction = await this.repo.getCorrectionForAttempt(attemptId, studentId);
-        
+
         if (!correction) {
-            throw new Error("Correction introuvable ou vous n'êtes pas autorisé à la consulter.");
+            throw new Error("Correction not found or you are not authorized to view it.");
         }
 
         return correction;

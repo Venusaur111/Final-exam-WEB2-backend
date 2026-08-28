@@ -29,8 +29,6 @@ app.use(express.json());
 const userRepository = new UserRepository();
 const userService = new UserService();
 
-// 2. Passage du service au contrôleur
-
 // ── Instanciations ────────────────────────────────────
 const authController = new AuthController();
 const userController = new UserController(userService);
@@ -46,22 +44,22 @@ const studentExamController = new StudentExamController();
 app.post("/api/auth/login", authController.login);
 
 // ══════════════════════════════════════════════════════
-// Administrateur uniquement
+// Admins only
 // ══════════════════════════════════════════════════════
 
-// ── Étudiants ─────────────────────────────────────────
+// ── Students ─────────────────────────────────────────
 app.get("/api/students", authenticate, requireRole("admin"), userController.getAllStudents);
 app.post("/api/students", authenticate, requireRole("admin"), userController.createStudent);
 app.put("/api/students/:id", authenticate, requireRole("admin"), userController.updateStudent);
 app.delete("/api/students/:id", authenticate, requireRole("admin"), userController.deactivateStudent); // RG-10
 
-// ── Cours ─────────────────────────────────────────────
+// ── Courses ─────────────────────────────────────────────
 app.get("/api/courses", authenticate, requireRole("admin"), courseController.getAllCourses);
 app.post("/api/courses", authenticate, requireRole("admin"), courseController.createCourse);
 app.put("/api/courses/:id", authenticate, requireRole("admin"), courseController.updateCourse);
 app.delete("/api/courses/:id", authenticate, requireRole("admin"), courseController.deleteCourse); // RG-09
 
-// ── Examens ───────────────────────────────────────────
+// ── Exams ───────────────────────────────────────────
 app.get("/api/exams", authenticate, requireRole("admin"), examController.getAllExams);
 app.post("/api/exams", authenticate, requireRole("admin"), examController.createExam);
 app.get("/api/exams/:id", authenticate, requireRole("admin"), examController.getExamById);
@@ -76,7 +74,7 @@ app.put("/api/questions/:id", authenticate, requireRole("admin"), questionContro
 app.delete("/api/questions/:id", authenticate, requireRole("admin"), questionController.deleteQuestion); // RG-08
 
 // ══════════════════════════════════════════════════════
-// Étudiant uniquement
+// Students only
 // ══════════════════════════════════════════════════════
 
 app.get("/api/my/exams", authenticate, requireRole("student"), studentExamController.getAvailableExams);

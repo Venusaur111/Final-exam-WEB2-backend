@@ -1,3 +1,4 @@
+// courseRepository.ts
 import { pool } from "../../config/database.js";
 export class CourseRepository {
     async findAll() {
@@ -19,7 +20,7 @@ export class CourseRepository {
     async create(data) {
         const result = await pool.query(`INSERT INTO courses (code, name, description)
              VALUES ($1, $2, $3)
-             RETURNING id, code, name, description, created_at AS "createdAt"`, [data.code, data.name, data.description ?? null]);
+                 RETURNING id, code, name, description, created_at AS "createdAt"`, [data.code, data.name, data.description ?? null]);
         return result.rows[0];
     }
     async update(id, data) {
@@ -28,11 +29,11 @@ export class CourseRepository {
                  name        = COALESCE($3, name),
                  description = COALESCE($4, description)
              WHERE id = $1
-             RETURNING id, code, name, description, created_at AS "createdAt"`, [id, data.code ?? null, data.name ?? null, data.description ?? null]);
+                 RETURNING id, code, name, description, created_at AS "createdAt"`, [id, data.code ?? null, data.name ?? null, data.description ?? null]);
         return result.rows[0] ?? null;
     }
-    // RG-09 : la contrainte ON DELETE RESTRICT sur exams.course_id
-    // fera échouer cette requête (23503) si le cours a des examens.
+    // RG-09: the ON DELETE CASCADE constraint on exams.course_id
+    // will delete associated exams when a course is deleted.
     async delete(id) {
         await pool.query(`DELETE FROM courses WHERE id = $1`, [id]);
     }

@@ -1,5 +1,7 @@
+// authRepository.ts
 import { pool } from "../../config/database.js";
 import { User } from "../../models/userModel.js";
+
 export class AuthRepository {
     async findByEmail(email: string): Promise<User | null> {
         const result = await pool.query(
@@ -11,4 +13,4 @@ export class AuthRepository {
         );
         return result.rows[0] ?? null;
     }
-}   
+}

@@ -1,3 +1,4 @@
+// authRepository.ts
 import { pool } from "../../config/database.js";
 export class AuthRepository {
     async findByEmail(email) {

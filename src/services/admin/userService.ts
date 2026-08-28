@@ -1,3 +1,4 @@
+// userService.ts
 import bcrypt from "bcrypt";
 import { UserRepository } from "../../Repository/admin/adminUserRepositories.js";
 import { User, CreateStudentInput, UpdateStudentInput } from "../../models/userModel.js";
@@ -13,20 +14,19 @@ export class UserService {
     async getStudentById(id: string): Promise<User> {
         const student = await this.userRepo.findById(id);
         if (!student) {
-            throw new Error("Étudiant non trouvé.");
+            throw new Error("Student not found.");
         }
         return student;
     }
 
-    async getAllStudents(): Promise<User[]> {
+    async getAllStudents(): Promise<readonly User[]> {
         return this.userRepo.findAllStudents();
     }
 
     async createStudent(data: Omit<CreateStudentInput, "passwordHash"> & { password: string }): Promise<User> {
         const existingUser = await this.userRepo.findByEmail(data.email);
         if (existingUser) {
-            // Corrected to English per code standards, matching the controller's expectation
-            throw new Error('User already exists.');
+            throw new Error("User already exists.");
         }
 
         const passwordHash = await bcrypt.hash(data.password, this.SALT_ROUNDS);
@@ -44,12 +44,12 @@ export class UserService {
         if (data.email) {
             const existing = await this.userRepo.findByEmail(data.email);
             if (existing && existing.id !== id) {
-                throw new Error("Cet email est déjà utilisé par un autre compte.");
+                throw new Error("This email is already used by another account.");
             }
         }
 
         const updated = await this.userRepo.updateStudent(id, data);
-        if (!updated) throw new Error("Échec de la mise à jour.");
+        if (!updated) throw new Error("Failed to update.");
         return updated;
     }
 
@@ -59,7 +59,7 @@ export class UserService {
         await this.userRepo.updatePassword(id, passwordHash);
     }
 
-    // RG-10 : Désactivation logique au lieu de la suppression physique
+    // RG-10: Logical deactivation instead of physical deletion
     async deactivateStudent(id: string): Promise<void> {
         await this.getStudentById(id);
         await this.userRepo.deactivate(id);

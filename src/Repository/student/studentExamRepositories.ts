@@ -1,3 +1,4 @@
+// studentExamRepository.ts
 import { pool } from "../../config/database.js";
 import { Exam } from "../../models/examModel.js";
 import { QuestionForStudent } from "../../models/questionModel.js";
@@ -5,17 +6,17 @@ import { Attempt, SubmitAnswerInput } from "../../models/attempt.js";
 import { ExamCorrection, AnswerCorrection } from "../../models/answer.js";
 
 export class StudentExamRepository {
-    // RG-02 + RG-03 : fenêtre ouverte ET pas de tentative existante
-    async findAvailableExams(studentId: string): Promise<Exam[]> {
+    // RG-02 + RG-03: open window AND no existing attempt[cite: 10]
+    async findAvailableExams(studentId: string): Promise<readonly Exam[]> {
         const result = await pool.query(
             `SELECT e.id, e.course_id AS "courseId", e.title, e.description,
                     e.start_at AS "startAt", e.end_at AS "endAt", e.created_at AS "createdAt"
              FROM exams e
              WHERE e.start_at <= now() AND e.end_at >= now()
                AND NOT EXISTS (
-                   SELECT 1 FROM attempts a
-                   WHERE a.exam_id = e.id AND a.student_id = $1
-               )
+                 SELECT 1 FROM attempts a
+                 WHERE a.exam_id = e.id AND a.student_id = $1
+             )
              ORDER BY e.end_at`,
             [studentId]
         );
@@ -48,13 +49,13 @@ export class StudentExamRepository {
         return (result.rowCount ?? 0) > 0;
     }
 
-    // RG-07 : is_correct jamais sélectionné
-    async getQuestionsForStudent(examId: string): Promise<QuestionForStudent[]> {
+    // RG-07: is_correct never selected[cite: 10]
+    async getQuestionsForStudent(examId: string): Promise<readonly QuestionForStudent[]> {
         const result = await pool.query(
             `SELECT q.id, q.statement, q.points,
                     c.id AS "choiceId", c.label AS "choiceLabel"
              FROM questions q
-             LEFT JOIN choices c ON c.question_id = q.id
+                      LEFT JOIN choices c ON c.question_id = q.id
              WHERE q.exam_id = $1
              ORDER BY q.created_at, c.label`,
             [examId]
@@ -65,16 +66,16 @@ export class StudentExamRepository {
                 map.set(row.id, { id: row.id, statement: row.statement, points: row.points, choices: [] });
             }
             if (row.choiceId) {
-                map.get(row.id)!.choices.push({ id: row.choiceId, questionId: row.id, label: row.choiceLabel });
+                (map.get(row.id)!.choices as any[]).push({ id: row.choiceId, questionId: row.id, label: row.choiceLabel });
             }
         }
         return Array.from(map.values());
     }
 
-    // RG-02 (unicité garantie aussi par la contrainte UNIQUE en base) +
-    // RG-05 (choix nul autorisé) + RG-06 (score calculé et écrit ici,
-    // jamais reçu du client) — tout dans une seule transaction.
-    async submitExam(examId: string, studentId: string, answers: SubmitAnswerInput[]): Promise<ExamCorrection> {
+    // RG-02 (uniqueness also guaranteed by database UNIQUE constraint) +
+    // RG-05 (null choice allowed) + RG-06 (score calculated and written here,
+    // never received from client) — all within a single transaction[cite: 10].
+    async submitExam(examId: string, studentId: string, answers: readonly SubmitAnswerInput[]): Promise<ExamCorrection> {
         const client = await pool.connect();
         try {
             await client.query("BEGIN");
@@ -82,7 +83,7 @@ export class StudentExamRepository {
             const attemptResult = await client.query(
                 `INSERT INTO attempts (exam_id, student_id, submitted_at)
                  VALUES ($1, $2, now())
-                 RETURNING id, exam_id AS "examId", student_id AS "studentId",
+                     RETURNING id, exam_id AS "examId", student_id AS "studentId",
                            score, started_at AS "startedAt", submitted_at AS "submittedAt"`,
                 [examId, studentId]
             );
@@ -96,18 +97,18 @@ export class StudentExamRepository {
                 );
             }
 
-            // Calcul du score et de la correction : jointure questions/choix
-            // correct vs choix soumis. RG-06 : calcul exclusivement serveur.
+            // Score and correction calculation: questions/choices join
+            // correct vs submitted choice. RG-06: server-side calculation exclusively[cite: 10].
             const correctionResult = await client.query(
                 `SELECT q.id AS "questionId", q.statement, q.points,
                         a.choice_id AS "chosenChoiceId",
                         correct.id AS "correctChoiceId",
                         (a.choice_id = correct.id) AS "isCorrect"
                  FROM questions q
-                 LEFT JOIN answers a
-                        ON a.question_id = q.id AND a.attempt_id = $1
-                 JOIN choices correct
-                        ON correct.question_id = q.id AND correct.is_correct = TRUE
+                          LEFT JOIN answers a
+                                    ON a.question_id = q.id AND a.attempt_id = $1
+                          JOIN choices correct
+                               ON correct.question_id = q.id AND correct.is_correct = TRUE
                  WHERE q.exam_id = $2
                  ORDER BY q.created_at`,
                 [attempt.id, examId]
@@ -140,13 +141,13 @@ export class StudentExamRepository {
     }
 
     async findMyResults(studentId: string): Promise<
-        { attemptId: string; examId: string; examTitle: string; score: number; submittedAt: Date }[]
+        readonly { readonly attemptId: string; readonly examId: string; readonly examTitle: string; readonly score: number; readonly submittedAt: Date }[]
     > {
         const result = await pool.query(
             `SELECT a.id AS "attemptId", e.id AS "examId", e.title AS "examTitle",
                     a.score, a.submitted_at AS "submittedAt"
              FROM attempts a
-             JOIN exams e ON e.id = a.exam_id
+                      JOIN exams e ON e.id = a.exam_id
              WHERE a.student_id = $1
              ORDER BY a.submitted_at DESC`,
             [studentId]
@@ -170,10 +171,10 @@ export class StudentExamRepository {
                     correct.id AS "correctChoiceId",
                     (a.choice_id = correct.id) AS "isCorrect"
              FROM questions q
-             LEFT JOIN answers a
-                    ON a.question_id = q.id AND a.attempt_id = $1
-             JOIN choices correct
-                    ON correct.question_id = q.id AND correct.is_correct = TRUE
+                      LEFT JOIN answers a
+                                ON a.question_id = q.id AND a.attempt_id = $1
+                      JOIN choices correct
+                           ON correct.question_id = q.id AND correct.is_correct = TRUE
              WHERE q.exam_id = $2
              ORDER BY q.created_at`,
             [attemptId, attempt.examId]

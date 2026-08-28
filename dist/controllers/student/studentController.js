@@ -6,16 +6,16 @@ export class StudentExamController {
     }
     /**
      * GET /api/my/exams
-     * Récupère les examens accessibles (fenêtre ouverte & non tentés)
+     * Retrieves accessible exams (open window & unattempted)[cite: 24]
      */
-    getAvailableExams = async (req, res) => {
+    getAvailableExams = async (_req, res) => {
         try {
-            const studentId = req.user?.id;
+            const studentId = _req.user?.id;
             const exams = await this.studentExamService.getAvailableExams(studentId);
             res.status(200).json({ success: true, data: exams });
         }
         catch (error) {
-            if (error.message.includes("requis")) {
+            if (error.message.includes("required")) {
                 res.status(401).json({ success: false, message: error.message });
                 return;
             }
@@ -24,7 +24,7 @@ export class StudentExamController {
     };
     /**
      * GET /api/my/exams/:id
-     * Alias utilisé dans server.ts pour récupérer l'examen/questions (RG-07)
+     * Alias used in server.ts to retrieve the exam/questions (RG-07)[cite: 24]
      */
     getExamToTake = async (req, res) => {
         try {
@@ -34,12 +34,12 @@ export class StudentExamController {
             res.status(200).json({ success: true, data: questions });
         }
         catch (error) {
-            if (error.message === "Examen introuvable.") {
+            if (error.message === "Exam not found.") {
                 res.status(404).json({ success: false, message: error.message });
                 return;
             }
             if (error.message.includes("accessible") ||
-                error.message.includes("déjà soumis")) {
+                error.message.includes("already submitted")) {
                 res.status(403).json({ success: false, message: error.message });
                 return;
             }
@@ -48,7 +48,7 @@ export class StudentExamController {
     };
     /**
      * POST /api/my/exams/:id/submit
-     * Soumet la tentative et effectue le calcul de la note côté serveur
+     * Submits the attempt and performs server-side grade calculation[cite: 24]
      */
     submitExam = async (req, res) => {
         try {
@@ -59,12 +59,12 @@ export class StudentExamController {
             res.status(201).json({ success: true, data: correction });
         }
         catch (error) {
-            if (error.message === "Examen introuvable.") {
+            if (error.message === "Exam not found.") {
                 res.status(404).json({ success: false, message: error.message });
                 return;
             }
-            if (error.message.includes("expirée") ||
-                error.message.includes("déjà passé")) {
+            if (error.message.includes("expired") ||
+                error.message.includes("already taken")) {
                 res.status(400).json({ success: false, message: error.message });
                 return;
             }
@@ -73,7 +73,7 @@ export class StudentExamController {
     };
     /**
      * GET /api/my/results/:attemptId/correction
-     * Récupère la correction détaillée d'une tentative
+     * Retrieves the detailed correction for an attempt[cite: 24]
      */
     getCorrectionForAttempt = async (req, res) => {
         try {
@@ -83,11 +83,11 @@ export class StudentExamController {
             res.status(200).json({ success: true, data: correction });
         }
         catch (error) {
-            if (error.message.includes("manquants")) {
+            if (error.message.includes("missing")) {
                 res.status(400).json({ success: false, message: error.message });
                 return;
             }
-            if (error.message.includes("introuvable")) {
+            if (error.message.includes("not found")) {
                 res.status(404).json({ success: false, message: error.message });
                 return;
             }

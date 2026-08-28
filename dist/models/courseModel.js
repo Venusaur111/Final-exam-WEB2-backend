@@ -1,1 +1,2 @@
+// course.ts
 export {};

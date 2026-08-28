@@ -1,3 +1,4 @@
+// userService.ts
 import bcrypt from "bcrypt";
 import { UserRepository } from "../../Repository/admin/adminUserRepositories.js";
 export class UserService {
@@ -9,7 +10,7 @@ export class UserService {
     async getStudentById(id) {
         const student = await this.userRepo.findById(id);
         if (!student) {
-            throw new Error("Étudiant non trouvé.");
+            throw new Error("Student not found.");
         }
         return student;
     }
@@ -17,12 +18,10 @@ export class UserService {
         return this.userRepo.findAllStudents();
     }
     async createStudent(data) {
-        // Validation unicité email
-        const existing = await this.userRepo.findByEmail(data.email);
-        if (existing) {
-            throw new Error("Un utilisateur avec cet email existe déjà.");
+        const existingUser = await this.userRepo.findByEmail(data.email);
+        if (existingUser) {
+            throw new Error("User already exists.");
         }
-        // Hachage du mot de passe (séparation des responsabilités du repo)
         const passwordHash = await bcrypt.hash(data.password, this.SALT_ROUNDS);
         return this.userRepo.createStudent({
             name: data.name,
@@ -35,12 +34,12 @@ export class UserService {
         if (data.email) {
             const existing = await this.userRepo.findByEmail(data.email);
             if (existing && existing.id !== id) {
-                throw new Error("Cet email est déjà utilisé par un autre compte.");
+                throw new Error("This email is already used by another account.");
             }
         }
         const updated = await this.userRepo.updateStudent(id, data);
         if (!updated)
-            throw new Error("Échec de la mise à jour.");
+            throw new Error("Failed to update.");
         return updated;
     }
     async updatePassword(id, newPassword) {
@@ -48,7 +47,7 @@ export class UserService {
         const passwordHash = await bcrypt.hash(newPassword, this.SALT_ROUNDS);
         await this.userRepo.updatePassword(id, passwordHash);
     }
-    // RG-10 : Désactivation logique au lieu de la suppression physique
+    // RG-10: Logical deactivation instead of physical deletion
     async deactivateStudent(id) {
         await this.getStudentById(id);
         await this.userRepo.deactivate(id);

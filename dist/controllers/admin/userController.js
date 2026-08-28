@@ -6,9 +6,9 @@ export class UserController {
     }
     /**
      * GET /api/students
-     * Récupère la liste de tous les étudiants
+     * Retrieves the list of all students
      */
-    getAllStudents = async (req, res) => {
+    getAllStudents = async (_req, res) => {
         try {
             const students = await this.userService.getAllStudents();
             res.status(200).json({ success: true, data: students });
@@ -18,26 +18,8 @@ export class UserController {
         }
     };
     /**
-     * GET /api/students/:id
-     * Récupère un étudiant par son ID
-     */
-    getStudentById = async (req, res) => {
-        try {
-            const { id } = req.params;
-            const student = await this.userService.getStudentById(id);
-            res.status(200).json({ success: true, data: student });
-        }
-        catch (error) {
-            if (error.message === "Étudiant non trouvé.") {
-                res.status(404).json({ success: false, message: error.message });
-                return;
-            }
-            res.status(500).json({ success: false, message: error.message });
-        }
-    };
-    /**
      * POST /api/students
-     * Crée un nouvel étudiant
+     * Creates a new student
      */
     createStudent = async (req, res) => {
         try {
@@ -45,7 +27,7 @@ export class UserController {
             res.status(201).json({ success: true, data: student });
         }
         catch (error) {
-            if (error.message === "Un utilisateur avec cet email existe déjà.") {
+            if (error.message === "User already exists.") {
                 res.status(409).json({ success: false, message: error.message });
                 return;
             }
@@ -54,7 +36,7 @@ export class UserController {
     };
     /**
      * PUT /api/students/:id
-     * Met à jour les informations d'un étudiant
+     * Updates student information
      */
     updateStudent = async (req, res) => {
         try {
@@ -63,11 +45,11 @@ export class UserController {
             res.status(200).json({ success: true, data: updatedStudent });
         }
         catch (error) {
-            if (error.message === "Étudiant non trouvé.") {
+            if (error.message === "Student not found.") {
                 res.status(404).json({ success: false, message: error.message });
                 return;
             }
-            if (error.message === "Cet email est déjà utilisé par un autre compte.") {
+            if (error.message === "This email is already used by another account.") {
                 res.status(409).json({ success: false, message: error.message });
                 return;
             }
@@ -76,21 +58,21 @@ export class UserController {
     };
     /**
      * PATCH /api/students/:id/password
-     * Met à jour le mot de passe d'un étudiant
+     * Updates a student's password
      */
     updatePassword = async (req, res) => {
         try {
             const { id } = req.params;
             const { newPassword } = req.body;
             if (!newPassword) {
-                res.status(400).json({ success: false, message: "Le nouveau mot de passe est requis." });
+                res.status(400).json({ success: false, message: "New password is required." });
                 return;
             }
             await this.userService.updatePassword(id, newPassword);
-            res.status(200).json({ success: true, message: "Mot de passe mis à jour avec succès." });
+            res.status(200).json({ success: true, message: "Password updated successfully." });
         }
         catch (error) {
-            if (error.message === "Étudiant non trouvé.") {
+            if (error.message === "Student not found.") {
                 res.status(404).json({ success: false, message: error.message });
                 return;
             }
@@ -99,16 +81,16 @@ export class UserController {
     };
     /**
      * DELETE /api/students/:id
-     * Désactivation logique d'un étudiant (RG-10)
+     * Logical deactivation of a student (RG-10)
      */
     deactivateStudent = async (req, res) => {
         try {
             const { id } = req.params;
             await this.userService.deactivateStudent(id);
-            res.status(200).json({ success: true, message: "Compte étudiant désactivé avec succès." });
+            res.status(200).json({ success: true, message: "Student account deactivated successfully." });
         }
         catch (error) {
-            if (error.message === "Étudiant non trouvé.") {
+            if (error.message === "Student not found.") {
                 res.status(404).json({ success: false, message: error.message });
                 return;
             }

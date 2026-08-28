@@ -4,14 +4,14 @@ export const requireRole = (role) => {
         if (!user) {
             res.status(401).json({
                 success: false,
-                message: "Utilisateur non authentifié."
+                message: "Unauthenticated user."
             });
             return;
         }
         if (user.role !== role) {
             res.status(403).json({
                 success: false,
-                message: `Accès refusé. Le rôle '${role}' est requis pour cette action.`
+                message: `Access denied. The role '${role}' is required for this action.`
             });
             return;
         }

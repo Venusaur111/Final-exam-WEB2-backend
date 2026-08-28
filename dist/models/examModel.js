@@ -1,1 +1,2 @@
+// exam.ts
 export {};

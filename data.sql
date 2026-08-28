@@ -74,7 +74,7 @@ CREATE TABLE choices (
 CREATE INDEX idx_choices_question_id ON choices(question_id);
 
 CREATE OR REPLACE FUNCTION validate_question_choices()
-RETURNS TRIGGER AS $$
+RETURNS TRIGGER AS $$VITE_API_URL=http://localhost:3000/api
 DECLARE
 v_question_id UUID;
     v_total       INTEGER;

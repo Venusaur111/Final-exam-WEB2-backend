@@ -1,3 +1,4 @@
+// examRepository.ts
 import { pool } from "../../config/database.js";
 import {
     Exam,
@@ -8,7 +9,7 @@ import {
 } from "../../models/examModel.js";
 
 export class ExamRepository {
-    async findAll(): Promise<Exam[]> {
+    async findAll(): Promise<readonly Exam[]> {
         const result = await pool.query(
             `SELECT id, course_id AS "courseId", title, description,
                     start_at AS "startAt", end_at AS "endAt", created_at AS "createdAt"
@@ -18,7 +19,7 @@ export class ExamRepository {
         return result.rows;
     }
 
-    async findByCourse(courseId: string): Promise<Exam[]> {
+    async findByCourse(courseId: string): Promise<readonly Exam[]> {
         const result = await pool.query(
             `SELECT id, course_id AS "courseId", title, description,
                     start_at AS "startAt", end_at AS "endAt", created_at AS "createdAt"
@@ -44,7 +45,7 @@ export class ExamRepository {
         const result = await pool.query(
             `INSERT INTO exams (course_id, title, description, start_at, end_at)
              VALUES ($1, $2, $3, $4, $5)
-             RETURNING id, course_id AS "courseId", title, description,
+                 RETURNING id, course_id AS "courseId", title, description,
                        start_at AS "startAt", end_at AS "endAt", created_at AS "createdAt"`,
             [data.courseId, data.title, data.description ?? null, data.startAt, data.endAt]
         );
@@ -59,14 +60,14 @@ export class ExamRepository {
                  start_at    = COALESCE($4, start_at),
                  end_at      = COALESCE($5, end_at)
              WHERE id = $1
-             RETURNING id, course_id AS "courseId", title, description,
+                 RETURNING id, course_id AS "courseId", title, description,
                        start_at AS "startAt", end_at AS "endAt", created_at AS "createdAt"`,
             [id, data.title ?? null, data.description ?? null, data.startAt ?? null, data.endAt ?? null]
         );
         return result.rows[0] ?? null;
     }
 
-    // RG-09 : ON DELETE RESTRICT sur attempts.exam_id bloque si tentatives
+    // RG-09: ON DELETE CASCADE on attempts.exam_id deletes associated attempts
     async delete(id: string): Promise<void> {
         await pool.query(`DELETE FROM exams WHERE id = $1`, [id]);
     }
@@ -92,12 +93,12 @@ export class ExamRepository {
             `SELECT u.id AS "studentId", u.name AS "studentName",
                     a.score, a.submitted_at AS "submittedAt"
              FROM attempts a
-             JOIN users u ON u.id = a.student_id
+                      JOIN users u ON u.id = a.student_id
              WHERE a.exam_id = $1
              ORDER BY a.submitted_at DESC`,
             [examId]
         );
-        const rows: ExamResultRow[] = result.rows;
+        const rows: readonly ExamResultRow[] = result.rows;
         const attemptsCount = rows.length;
         const average =
             attemptsCount === 0
