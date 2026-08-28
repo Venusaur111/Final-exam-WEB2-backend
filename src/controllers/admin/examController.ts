@@ -13,7 +13,7 @@ export class ExamController {
      * GET /api/admin/exams
      * Retrieves the list of all exams
      */
-    getAllExams = async (req: Request, res: Response): Promise<void> => {
+    getAllExams = async (_req: Request, res: Response): Promise<void> => {
         try {
             const exams = await this.examService.getAllExams();
             res.status(200).json({ success: true, data: exams });

@@ -1,18 +1,28 @@
+// attempt.ts
+
+/**
+ * Represents a student's attempt at an exam.
+ */
 export interface Attempt {
-    id: string;
-    examId: string;
-    studentId: string;
-    score: number | null; // null tant que non soumis
-    startedAt: Date;
-    submittedAt: Date | null;
+    readonly id: string;
+    readonly examId: string;
+    readonly studentId: string;
+    readonly score: number | null; // null until submitted[cite: 26]
+    readonly startedAt: Date;
+    readonly submittedAt: Date | null;
 }
 
-// Ce que le client envoie à la soumission (RG-06 : jamais de score ni de isCorrect)
+/**
+ * Represents the data sent by the client upon submission (RG-06: never includes score or isCorrect)[cite: 26].
+ */
 export interface SubmitAnswerInput {
-    questionId: string;
-    choiceId: string | null; // null autorisé = question laissée sans réponse (RG-05)
+    readonly questionId: string;
+    readonly choiceId: string | null; // null allowed = question left unanswered (RG-05)[cite: 26]
 }
 
+/**
+ * Represents the payload for submitting an entire exam.
+ */
 export interface SubmitExamInput {
-    answers: SubmitAnswerInput[];
+    readonly answers: readonly SubmitAnswerInput[];
 }

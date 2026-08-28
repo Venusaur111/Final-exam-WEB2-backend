@@ -1,38 +1,54 @@
+// exam.ts
+
+/**
+ * Represents an exam entity.
+ */
 export interface Exam {
-    id: string;
-    courseId: string;
-    title: string;
-    description: string | null;
-    startAt: Date;
-    endAt: Date;
-    createdAt: Date;
+    readonly id: string;
+    readonly courseId: string;
+    readonly title: string;
+    readonly description: string | null;
+    readonly startAt: Date;
+    readonly endAt: Date;
+    readonly createdAt: Date;
 }
 
+/**
+ * Represents the data required to create a new exam.
+ */
 export interface CreateExamInput {
-    courseId: string;
-    title: string;
-    description?: string;
-    startAt: Date;
-    endAt: Date;
+    readonly courseId: string;
+    readonly title: string;
+    readonly description?: string;
+    readonly startAt: Date;
+    readonly endAt: Date;
 }
 
+/**
+ * Represents the data allowed for updating an existing exam.
+ */
 export interface UpdateExamInput {
-    title?: string;
-    description?: string;
-    startAt?: Date;
-    endAt?: Date;
+    readonly title?: string;
+    readonly description?: string;
+    readonly startAt?: Date;
+    readonly endAt?: Date;
 }
 
-// Ligne agrégée pour GET /api/exams/:id/results
+/**
+ * Represents an aggregated result row for GET /api/exams/:id/results.
+ */
 export interface ExamResultRow {
-    studentId: string;
-    studentName: string;
-    score: number;
-    submittedAt: Date;
+    readonly studentId: string;
+    readonly studentName: string;
+    readonly score: number;
+    readonly submittedAt: Date;
 }
 
+/**
+ * Represents the summary of results for an exam.
+ */
 export interface ExamResultsSummary {
-    rows: ExamResultRow[];
-    average: number;
-    attemptsCount: number;
+    readonly rows: readonly ExamResultRow[];
+    readonly average: number;
+    readonly attemptsCount: number;
 }

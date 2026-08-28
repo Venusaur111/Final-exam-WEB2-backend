@@ -1,3 +1,4 @@
+// StudentExamController.ts
 import { Request, Response } from "express";
 import { StudentExamService } from "../../services/student/studentExamService.js";
 
@@ -10,15 +11,15 @@ export class StudentExamController {
 
     /**
      * GET /api/my/exams
-     * Récupère les examens accessibles (fenêtre ouverte & non tentés)
+     * Retrieves accessible exams (open window & unattempted)[cite: 24]
      */
-    getAvailableExams = async (req: Request, res: Response): Promise<void> => {
+    public getAvailableExams = async (_req: Request, res: Response): Promise<void> => {
         try {
-            const studentId = (req as any).user?.id;
+            const studentId = (_req as any).user?.id;
             const exams = await this.studentExamService.getAvailableExams(studentId);
             res.status(200).json({ success: true, data: exams });
         } catch (error: any) {
-            if (error.message.includes("requis")) {
+            if (error.message.includes("required")) {
                 res.status(401).json({ success: false, message: error.message });
                 return;
             }
@@ -28,22 +29,22 @@ export class StudentExamController {
 
     /**
      * GET /api/my/exams/:id
-     * Alias utilisé dans server.ts pour récupérer l'examen/questions (RG-07)
+     * Alias used in server.ts to retrieve the exam/questions (RG-07)[cite: 24]
      */
-    getExamToTake = async (req: Request<{ id: string }>, res: Response): Promise<void> => {
+    public getExamToTake = async (req: Request<{ id: string }>, res: Response): Promise<void> => {
         try {
             const { id: examId } = req.params;
             const studentId = (req as any).user?.id;
             const questions = await this.studentExamService.getExamQuestions(examId, studentId);
             res.status(200).json({ success: true, data: questions });
         } catch (error: any) {
-            if (error.message === "Examen introuvable.") {
+            if (error.message === "Exam not found.") {
                 res.status(404).json({ success: false, message: error.message });
                 return;
             }
             if (
-                error.message.includes("accessible") || 
-                error.message.includes("déjà soumis")
+                error.message.includes("accessible") ||
+                error.message.includes("already submitted")
             ) {
                 res.status(403).json({ success: false, message: error.message });
                 return;
@@ -54,29 +55,29 @@ export class StudentExamController {
 
     /**
      * POST /api/my/exams/:id/submit
-     * Soumet la tentative et effectue le calcul de la note côté serveur
+     * Submits the attempt and performs server-side grade calculation[cite: 24]
      */
-    submitExam = async (req: Request<{ id: string }>, res: Response): Promise<void> => {
+    public submitExam = async (req: Request<{ id: string }>, res: Response): Promise<void> => {
         try {
             const { id: examId } = req.params;
             const studentId = (req as any).user?.id;
             const { answers } = req.body;
 
             const correction = await this.studentExamService.submitExam(
-                examId, 
-                studentId, 
+                examId,
+                studentId,
                 answers ?? req.body
             );
-            
+
             res.status(201).json({ success: true, data: correction });
         } catch (error: any) {
-            if (error.message === "Examen introuvable.") {
+            if (error.message === "Exam not found.") {
                 res.status(404).json({ success: false, message: error.message });
                 return;
             }
             if (
-                error.message.includes("expirée") || 
-                error.message.includes("déjà passé")
+                error.message.includes("expired") ||
+                error.message.includes("already taken")
             ) {
                 res.status(400).json({ success: false, message: error.message });
                 return;
@@ -87,28 +88,28 @@ export class StudentExamController {
 
     /**
      * GET /api/my/results/:attemptId/correction
-     * Récupère la correction détaillée d'une tentative
+     * Retrieves the detailed correction for an attempt[cite: 24]
      */
-getCorrectionForAttempt = async (req: Request<{ attemptId: string }>, res: Response): Promise<void> => {
-    try {
-        const { attemptId } = req.params;
-        const studentId = (req as any).user?.id;
+    public getCorrectionForAttempt = async (req: Request<{ attemptId: string }>, res: Response): Promise<void> => {
+        try {
+            const { attemptId } = req.params;
+            const studentId = (req as any).user?.id;
 
-        const correction = await this.studentExamService.getCorrectionForAttempt(
-            attemptId, 
-            studentId
-        );
-        res.status(200).json({ success: true, data: correction });
-    } catch (error: any) {
-        if (error.message.includes("manquants")) {
-            res.status(400).json({ success: false, message: error.message });
-            return;
+            const correction = await this.studentExamService.getCorrectionForAttempt(
+                attemptId,
+                studentId
+            );
+            res.status(200).json({ success: true, data: correction });
+        } catch (error: any) {
+            if (error.message.includes("missing")) {
+                res.status(400).json({ success: false, message: error.message });
+                return;
+            }
+            if (error.message.includes("not found")) {
+                res.status(404).json({ success: false, message: error.message });
+                return;
+            }
+            res.status(500).json({ success: false, message: error.message });
         }
-        if (error.message.includes("introuvable")) {
-            res.status(404).json({ success: false, message: error.message });
-            return;
-        }
-        res.status(500).json({ success: false, message: error.message });
-    }
-};
+    };
 }

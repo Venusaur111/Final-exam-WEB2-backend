@@ -1,14 +1,24 @@
+// choice.ts
+
+/**
+ * Represents a choice option for a question.
+ */
 export interface Choice {
-    id: string;
-    questionId: string;
-    label: string;
-    isCorrect: boolean;
+    readonly id: string;
+    readonly questionId: string;
+    readonly label: string;
+    readonly isCorrect: boolean;
 }
 
-// Vue exposée à l'étudiant (RG-07) : jamais isCorrect
+/**
+ * Represents the choice view exposed to students (RG-07: never exposes isCorrect)[cite: 27].
+ */
 export type ChoiceForStudent = Omit<Choice, "isCorrect">;
 
+/**
+ * Represents the data required to create a new choice.
+ */
 export interface CreateChoiceInput {
-    label: string;
-    isCorrect: boolean;
+    readonly label: string;
+    readonly isCorrect: boolean;
 }

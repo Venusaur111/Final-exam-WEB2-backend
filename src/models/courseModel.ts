@@ -1,19 +1,30 @@
+// course.ts
+
+/**
+ * Represents a course entity.
+ */
 export interface Course {
-    id: string;
-    code: string;
-    name: string;
-    description: string | null;
-    createdAt: Date;
+    readonly id: string;
+    readonly code: string;
+    readonly name: string;
+    readonly description: string | null;
+    readonly createdAt: Date;
 }
- 
+
+/**
+ * Represents the data required to create a new course[cite: 18].
+ */
 export interface CreateCourseInput {
-    code: string;
-    name: string;
-    description?: string;
+    readonly code: string;
+    readonly name: string;
+    readonly description?: string;
 }
- 
+
+/**
+ * Represents the data allowed for updating an existing course[cite: 18].
+ */
 export interface UpdateCourseInput {
-    code?: string;
-    name?: string;
-    description?: string;
+    readonly code?: string;
+    readonly name?: string;
+    readonly description?: string;
 }

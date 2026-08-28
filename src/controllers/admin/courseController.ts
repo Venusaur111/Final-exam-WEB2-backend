@@ -13,7 +13,7 @@ export class CourseController {
      * GET /api/courses
      * Retrieves the list of all courses
      */
-    getAllCourses = async (req: Request, res: Response): Promise<void> => {
+    getAllCourses = async (_req: Request, res: Response): Promise<void> => {
         try {
             const courses = await this.courseService.getAllCourses();
             res.status(200).json({ success: true, data: courses });
