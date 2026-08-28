@@ -21,8 +21,6 @@ CREATE TABLE users (
 
 -- ============================================================================
 -- TABLE : courses
--- RG-09: a course with exams cannot be deleted
---        -> guaranteed by ON DELETE RESTRICT on exams.course_id (below)
 -- ============================================================================
 CREATE TABLE courses (
                          id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -34,13 +32,11 @@ CREATE TABLE courses (
 
 -- ============================================================================
 -- TABLE : exams
--- RG-03: availability window (server validation in addition to CHECK)
--- RG-09: ON DELETE RESTRICT towards courses -> blocks deletion of a course
---        that has exams
+-- ON DELETE CASCADE added to allow course deletion along with its exams
 -- ============================================================================
 CREATE TABLE exams (
                        id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-                       course_id   UUID NOT NULL REFERENCES courses(id) ON DELETE RESTRICT,
+                       course_id   UUID NOT NULL REFERENCES courses(id) ON DELETE CASCADE,
                        title       VARCHAR(255) NOT NULL,
                        description TEXT,
                        start_at    TIMESTAMPTZ NOT NULL,
@@ -53,10 +49,7 @@ CREATE INDEX idx_exams_course_id ON exams(course_id);
 
 -- ============================================================================
 -- TABLE : questions
--- RG-08: locking managed at the Service level (prohibition to modify/
---        delete if the exam has attempts); ON DELETE CASCADE here
---        only applies when the exam itself is deletable
---        (therefore without attempts, cf RG-09 on exams -> attempts below)
+-- ON DELETE CASCADE already present here to delete questions with exams
 -- ============================================================================
 CREATE TABLE questions (
                            id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -70,11 +63,6 @@ CREATE INDEX idx_questions_exam_id ON questions(exam_id);
 
 -- ============================================================================
 -- TABLE : choices
--- RG-04: between 2 and 6 choices per question, exactly one correct.
--- Impossible to guarantee with a simple CHECK (rule applies to all
--- rows linked to a question) -> DEFERRABLE constraint trigger, checked
--- at the end of the transaction (allows inserting choices one by one or in
--- batch within the same transaction, cf CreateQuestionInput on service side).
 -- ============================================================================
 CREATE TABLE choices (
                          id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -125,14 +113,11 @@ CREATE CONSTRAINT TRIGGER trg_validate_question_choices
 
 -- ============================================================================
 -- TABLE : attempts
--- RG-02: a student can only take an exam once
---        -> UNIQUE(exam_id, student_id), in addition to server validation
--- RG-09: ON DELETE RESTRICT -> blocks deletion of an exam that has
---        attempts
+-- ON DELETE CASCADE added to allow exam deletion along with its attempts
 -- ============================================================================
 CREATE TABLE attempts (
                           id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-                          exam_id      UUID NOT NULL REFERENCES exams(id) ON DELETE RESTRICT,
+                          exam_id      UUID NOT NULL REFERENCES exams(id) ON DELETE CASCADE,
                           student_id   UUID NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
                           score        INTEGER,
                           started_at   TIMESTAMPTZ NOT NULL DEFAULT now(),
@@ -144,16 +129,14 @@ CREATE INDEX idx_attempts_exam_id ON attempts(exam_id);
 CREATE INDEX idx_attempts_student_id ON attempts(student_id);
 
 -- ============================================================================
--- TABLE : answers (answers given during an attempt)
--- RG-05: choice_id NULLABLE -> question left unanswered = 0 points
--- RG-06: score is never stored here, it is recalculated and written to
---        attempts.score server-side upon submission
+-- TABLE : answers
+-- ON DELETE CASCADE added for question_id to allow question deletion along with answers
 -- ============================================================================
 CREATE TABLE answers (
                          id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
                          attempt_id  UUID NOT NULL REFERENCES attempts(id) ON DELETE CASCADE,
-                         question_id UUID NOT NULL REFERENCES questions(id) ON DELETE RESTRICT,
-                         choice_id   UUID REFERENCES choices(id) ON DELETE RESTRICT,
+                         question_id UUID NOT NULL REFERENCES questions(id) ON DELETE CASCADE,
+                         choice_id   UUID REFERENCES choices(id) ON DELETE SET NULL,
                          CONSTRAINT uq_answer_attempt_question UNIQUE (attempt_id, question_id)
 );
 
@@ -161,20 +144,13 @@ CREATE INDEX idx_answers_attempt_id ON answers(attempt_id);
 CREATE INDEX idx_answers_question_id ON answers(question_id);
 
 -- ============================================================================
--- SEED — Initial data (RG-01: the first admin is created by script,
--- never by self-registration)
+-- SEED — Initial data
 -- ============================================================================
 
--- Test administrator account
--- email    : admin@examhub.local
--- password : Admin123!
--- Set client encoding to UTF-8 to avoid WIN1252 error
 \encoding UTF8
 
--- 1. Preventive cleanup of partially inserted data
 TRUNCATE users, courses, exams, questions, choices CASCADE;
 
--- 2. Test administrator account
 INSERT INTO users (name, email, password_hash, role, is_active)
 VALUES (
            'Administrator',
@@ -184,7 +160,6 @@ VALUES (
            TRUE
        );
 
--- 3. Test student account
 INSERT INTO users (name, email, password_hash, role, is_active)
 VALUES (
            'Test Student',
@@ -194,16 +169,13 @@ VALUES (
            TRUE
        );
 
--- 4. Demo course
 INSERT INTO courses (code, name, description)
 VALUES ('PROG2', 'Advanced Programming', 'Object-oriented programming and data structures course.');
 
--- 5. Demo exam
 INSERT INTO exams (course_id, title, description, start_at, end_at)
 SELECT id, 'PROG2 Final Exam', 'End of module evaluation.', now() - INTERVAL '1 day', now() + INTERVAL '30 days'
 FROM courses WHERE code = 'PROG2';
 
--- 6. Insertion of Questions and Choices (PL/pgSQL Block)
 DO $$
 DECLARE
 v_exam_id UUID;
@@ -212,7 +184,6 @@ v_exam_id UUID;
 BEGIN
 SELECT id INTO v_exam_id FROM exams WHERE title = 'PROG2 Final Exam';
 
--- Question 1
 INSERT INTO questions (exam_id, statement, points)
 VALUES (v_exam_id, 'Which data structure operates on a LIFO basis?', 2)
     RETURNING id INTO v_q1_id;
@@ -223,7 +194,6 @@ INSERT INTO choices (question_id, label, is_correct) VALUES
                                                          (v_q1_id, 'Linked List', FALSE),
                                                          (v_q1_id, 'Binary Tree', FALSE);
 
--- Question 2
 INSERT INTO questions (exam_id, statement, points)
 VALUES (v_exam_id, 'What is the average time complexity of a search in a hash table?', 3)
     RETURNING id INTO v_q2_id;
