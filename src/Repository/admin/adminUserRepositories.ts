@@ -1,7 +1,5 @@
 import { pool } from '../../config/database.js';
 import { User, CreateStudentInput, UpdateStudentInput } from "../../models/userModel.js";
-import { CreateUserDto } from '../../models/dto/createDtoTypes.js';
-import bcrypt from 'bcrypt';
 
 export class UserRepository {
     async findById(id: string): Promise<User | null> {
