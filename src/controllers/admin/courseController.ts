@@ -1,3 +1,4 @@
+// CourseController.ts
 import { Request, Response } from "express";
 import { CourseService } from "../../services/admin/courseService.js";
 
@@ -10,7 +11,7 @@ export class CourseController {
 
     /**
      * GET /api/courses
-     * Récupère la liste de tous les cours
+     * Retrieves the list of all courses
      */
     getAllCourses = async (req: Request, res: Response): Promise<void> => {
         try {
@@ -23,7 +24,7 @@ export class CourseController {
 
     /**
      * GET /api/courses/:id
-     * Récupère un cours par son ID
+     * Retrieves a course by its ID
      */
     getCourseById = async (req: Request<{ id: string }>, res: Response): Promise<void> => {
         try {
@@ -31,7 +32,7 @@ export class CourseController {
             const course = await this.courseService.getCourseById(id);
             res.status(200).json({ success: true, data: course });
         } catch (error: any) {
-            if (error.message === "Cours non trouvé.") {
+            if (error.message === "Course not found.") {
                 res.status(404).json({ success: false, message: error.message });
                 return;
             }
@@ -41,14 +42,14 @@ export class CourseController {
 
     /**
      * POST /api/courses
-     * Crée un nouveau cours
+     * Creates a new course
      */
     createCourse = async (req: Request, res: Response): Promise<void> => {
         try {
             const course = await this.courseService.createCourse(req.body);
             res.status(201).json({ success: true, data: course });
         } catch (error: any) {
-            if (error.message === "Un cours avec ce code existe déjà.") {
+            if (error.message === "A course with this code already exists.") {
                 res.status(409).json({ success: false, message: error.message });
                 return;
             }
@@ -58,7 +59,7 @@ export class CourseController {
 
     /**
      * PUT /api/courses/:id
-     * Met à jour un cours existant
+     * Updates an existing course
      */
     updateCourse = async (req: Request<{ id: string }>, res: Response): Promise<void> => {
         try {
@@ -66,11 +67,11 @@ export class CourseController {
             const updatedCourse = await this.courseService.updateCourse(id, req.body);
             res.status(200).json({ success: true, data: updatedCourse });
         } catch (error: any) {
-            if (error.message === "Cours non trouvé.") {
+            if (error.message === "Course not found.") {
                 res.status(404).json({ success: false, message: error.message });
                 return;
             }
-            if (error.message === "Ce code de cours est déjà utilisé.") {
+            if (error.message === "This course code is already in use.") {
                 res.status(409).json({ success: false, message: error.message });
                 return;
             }
@@ -80,15 +81,15 @@ export class CourseController {
 
     /**
      * DELETE /api/courses/:id
-     * Supprime un cours (Bloqué si des examens y sont rattachés - RG-09)
+     * Deletes a course (Blocked if exams are attached - RG-09)
      */
     deleteCourse = async (req: Request<{ id: string }>, res: Response): Promise<void> => {
         try {
             const { id } = req.params;
             await this.courseService.deleteCourse(id);
-            res.status(200).json({ success: true, message: "Cours supprimé avec succès." });
+            res.status(200).json({ success: true, message: "Course deleted successfully." });
         } catch (error: any) {
-            if (error.message === "Cours non trouvé.") {
+            if (error.message === "Course not found.") {
                 res.status(404).json({ success: false, message: error.message });
                 return;
             }

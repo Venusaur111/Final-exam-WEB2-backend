@@ -23,13 +23,12 @@ export class UserService {
     }
 
     async createStudent(data: Omit<CreateStudentInput, "passwordHash"> & { password: string }): Promise<User> {
-        // Validation unicité email
-        const existing = await this.userRepo.findByEmail(data.email);
-        if (existing) {
-            throw new Error("Un utilisateur avec cet email existe déjà.");
+        const existingUser = await this.userRepo.findByEmail(data.email);
+        if (existingUser) {
+            // Corrected to English per code standards, matching the controller's expectation
+            throw new Error('User already exists.');
         }
 
-        // Hachage du mot de passe (séparation des responsabilités du repo)
         const passwordHash = await bcrypt.hash(data.password, this.SALT_ROUNDS);
 
         return this.userRepo.createStudent({

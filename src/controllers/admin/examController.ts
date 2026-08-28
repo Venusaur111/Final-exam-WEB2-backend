@@ -1,5 +1,6 @@
+// ExamController.ts
 import { Request, Response } from "express";
-import { ExamService } from "../../services/admin/examService.js"; // Adapte le chemin si nécessaire
+import { ExamService } from "../../services/admin/examService.js";
 
 export class ExamController {
     private examService: ExamService;
@@ -10,7 +11,7 @@ export class ExamController {
 
     /**
      * GET /api/admin/exams
-     * Récupère la liste de tous les examens
+     * Retrieves the list of all exams
      */
     getAllExams = async (req: Request, res: Response): Promise<void> => {
         try {
@@ -23,25 +24,25 @@ export class ExamController {
 
     /**
      * GET /api/admin/exams/course/:courseId
-     * Récupère les examens d'un cours spécifique
+     * Retrieves exams for a specific course
      */
-getExamsByCourse = async (req: Request<{ courseId: string }>, res: Response): Promise<void> => {
-    try {
-        const { courseId } = req.params; // courseId est maintenant garanti de type 'string'
-        const exams = await this.examService.getExamsByCourse(courseId);
-        res.status(200).json({ success: true, data: exams });
-    } catch (error: any) {
-        if (error.message === "Cours non trouvé.") {
-            res.status(404).json({ success: false, message: error.message });
-            return;
+    getExamsByCourse = async (req: Request<{ courseId: string }>, res: Response): Promise<void> => {
+        try {
+            const { courseId } = req.params;
+            const exams = await this.examService.getExamsByCourse(courseId);
+            res.status(200).json({ success: true, data: exams });
+        } catch (error: any) {
+            if (error.message === "Course not found.") {
+                res.status(404).json({ success: false, message: error.message });
+                return;
+            }
+            res.status(500).json({ success: false, message: error.message });
         }
-        res.status(500).json({ success: false, message: error.message });
-    }
-};
+    };
 
     /**
      * GET /api/admin/exams/:id
-     * Récupère un examen par son ID
+     * Retrieves an exam by its ID
      */
     getExamById = async (req: Request<{ id: string }>, res: Response): Promise<void> => {
         try {
@@ -49,7 +50,7 @@ getExamsByCourse = async (req: Request<{ courseId: string }>, res: Response): Pr
             const exam = await this.examService.getExamById(id);
             res.status(200).json({ success: true, data: exam });
         } catch (error: any) {
-            if (error.message === "Examen non trouvé.") {
+            if (error.message === "Exam not found.") {
                 res.status(404).json({ success: false, message: error.message });
                 return;
             }
@@ -59,18 +60,18 @@ getExamsByCourse = async (req: Request<{ courseId: string }>, res: Response): Pr
 
     /**
      * POST /api/admin/exams
-     * Crée un nouvel examen
+     * Creates a new exam
      */
     createExam = async (req: Request, res: Response): Promise<void> => {
         try {
             const exam = await this.examService.createExam(req.body);
             res.status(201).json({ success: true, data: exam });
         } catch (error: any) {
-            if (error.message === "Le cours spécifié n'existe pas.") {
+            if (error.message === "The specified course does not exist.") {
                 res.status(404).json({ success: false, message: error.message });
                 return;
             }
-            if (error.message === "La date de début doit être antérieure à la date de fin.") {
+            if (error.message === "The start date must be earlier than the end date.") {
                 res.status(400).json({ success: false, message: error.message });
                 return;
             }
@@ -80,7 +81,7 @@ getExamsByCourse = async (req: Request<{ courseId: string }>, res: Response): Pr
 
     /**
      * PUT /api/admin/exams/:id
-     * Met à jour un examen existant
+     * Updates an existing exam
      */
     updateExam = async (req: Request<{ id: string }>, res: Response): Promise<void> => {
         try {
@@ -88,11 +89,11 @@ getExamsByCourse = async (req: Request<{ courseId: string }>, res: Response): Pr
             const updated = await this.examService.updateExam(id, req.body);
             res.status(200).json({ success: true, data: updated });
         } catch (error: any) {
-            if (error.message === "Examen non trouvé.") {
+            if (error.message === "Exam not found.") {
                 res.status(404).json({ success: false, message: error.message });
                 return;
             }
-            if (error.message === "La date de début doit être antérieure à la date de fin.") {
+            if (error.message === "The start date must be earlier than the end date.") {
                 res.status(400).json({ success: false, message: error.message });
                 return;
             }
@@ -102,15 +103,15 @@ getExamsByCourse = async (req: Request<{ courseId: string }>, res: Response): Pr
 
     /**
      * DELETE /api/admin/exams/:id
-     * Supprime un examen (vérification RG-09 appliquée via le service)
+     * Deletes an exam (RG-09 check applied via service)
      */
     deleteExam = async (req: Request<{ id: string }>, res: Response): Promise<void> => {
         try {
             const { id } = req.params;
             await this.examService.deleteExam(id);
-            res.status(200).json({ success: true, message: "Examen supprimé avec succès." });
+            res.status(200).json({ success: true, message: "Exam deleted successfully." });
         } catch (error: any) {
-            if (error.message === "Examen non trouvé.") {
+            if (error.message === "Exam not found.") {
                 res.status(404).json({ success: false, message: error.message });
                 return;
             }
@@ -124,7 +125,7 @@ getExamsByCourse = async (req: Request<{ courseId: string }>, res: Response): Pr
 
     /**
      * GET /api/admin/exams/:id/results
-     * Récupère le résumé des résultats d'un examen
+     * Retrieves the results summary for an exam
      */
     getExamResults = async (req: Request<{ id: string }>, res: Response): Promise<void> => {
         try {
@@ -132,7 +133,7 @@ getExamsByCourse = async (req: Request<{ courseId: string }>, res: Response): Pr
             const results = await this.examService.getExamResults(id);
             res.status(200).json({ success: true, data: results });
         } catch (error: any) {
-            if (error.message === "Examen non trouvé.") {
+            if (error.message === "Exam not found.") {
                 res.status(404).json({ success: false, message: error.message });
                 return;
             }
