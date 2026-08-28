@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { QuestionService } from "../../services/admin/QuestionService.js";
+import { QuestionService } from "../../services/admin/questionService.js";
 
 export class QuestionController {
     private questionService: QuestionService;

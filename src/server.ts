@@ -23,12 +23,20 @@ import { StudentExamController } from "./controllers/student/studentController.j
 // ── Security ──────────────────────────────────────────
 import { authenticate } from "./Security/authenticate.js";
 import { requireRole } from "./Security/requireRole.js";
+import cors from "cors";
+
 
 const app = express();
 app.use(express.json());
 const userRepository = new UserRepository();
 const userService = new UserService();
 
+
+// Autoriser les requêtes venant du frontend Vite
+app.use(cors({
+  origin: "http://localhost:5173", // Adresse exacte de votre front Vite
+  credentials: true
+}));
 // 2. Passage du service au contrôleur
 
 // ── Instanciations ────────────────────────────────────
@@ -86,8 +94,14 @@ app.get("/api/my/results/:attemptId/correction", authenticate, requireRole("stud
 
 // ══════════════════════════════════════════════════════
 
+
+//test
+app.get("/api/test", (req, res) => {
+  res.json({ message: "Le Front et le Back communiquent parfaitement !" });
+});
+    
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
+app.listen(PORT, () => {    
     console.log(`Serveur démarré sur http://localhost:${PORT}`);
 });
 

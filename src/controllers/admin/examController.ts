@@ -25,19 +25,19 @@ export class ExamController {
      * GET /api/admin/exams/course/:courseId
      * Récupère les examens d'un cours spécifique
      */
-getExamsByCourse = async (req: Request<{ courseId: string }>, res: Response): Promise<void> => {
-    try {
-        const { courseId } = req.params; // courseId est maintenant garanti de type 'string'
-        const exams = await this.examService.getExamsByCourse(courseId);
-        res.status(200).json({ success: true, data: exams });
-    } catch (error: any) {
-        if (error.message === "Cours non trouvé.") {
-            res.status(404).json({ success: false, message: error.message });
-            return;
+    getExamsByCourse = async (req: Request<{ courseId: string }>, res: Response): Promise<void> => {
+        try {
+            const { courseId } = req.params; // courseId est maintenant garanti de type 'string'
+            const exams = await this.examService.getExamsByCourse(courseId);
+            res.status(200).json({ success: true, data: exams });
+        } catch (error: any) {
+            if (error.message === "Cours non trouvé.") {
+                res.status(404).json({ success: false, message: error.message });
+                return;
+            }
+            res.status(500).json({ success: false, message: error.message });
         }
-        res.status(500).json({ success: false, message: error.message });
-    }
-};
+    };
 
     /**
      * GET /api/admin/exams/:id

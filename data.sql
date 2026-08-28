@@ -100,7 +100,7 @@ BEGIN
 
     SELECT COUNT(*), COUNT(*) FILTER (WHERE is_correct)
     INTO v_total, v_correct
-    FROM choices
+    FROM choices 
     WHERE question_id = v_question_id;
 
     IF v_total < 2 OR v_total > 6 THEN
