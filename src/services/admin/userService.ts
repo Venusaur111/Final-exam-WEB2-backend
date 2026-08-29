@@ -65,4 +65,9 @@ export class UserService {
         await this.getStudentById(id);
         await this.userRepo.deactivate(id);
     }
+
+    async activateStudent(id: string): Promise<void> {
+        await this.getStudentById(id);
+        await this.userRepo.activate(id);
+    }
 }

@@ -120,4 +120,22 @@ export class UserController {
             res.status(500).json({ success: false, message: error.message });
         }
     };
+
+    /**
+     * PATCH /api/students/:id/activate
+     * Réactivation d'un compte étudiant désactivé
+     */
+    public activateStudent = async (req: Request<{ id: string }>, res: Response): Promise<void> => {
+        try {
+            const { id } = req.params;
+            await this.userService.activateStudent(id);
+            res.status(200).json({ success: true, message: "Compte étudiant réactivé avec succès." });
+        } catch (error: any) {
+            if (error.message === "Étudiant non trouvé.") {
+                res.status(404).json({ success: false, message: error.message });
+                return;
+            }
+            res.status(500).json({ success: false, message: error.message });
+        }
+    };
 }

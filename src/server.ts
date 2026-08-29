@@ -1,45 +1,31 @@
 import express from "express";
-// ── Admin: Students ───────────────────────────────────
-import { UserRepository } from "./Repository/admin/adminUserRepositories.js";
-import { UserService } from "./services/admin/userService.js";
-// ── Auth ──────────────────────────────────────────────
-import { AuthController } from "./controllers/auth/authController.js";
-
-// ── Admin: Students ───────────────────────────────────
-import { UserController } from "./controllers/admin/userController.js";
-
-// ── Admin: Courses ────────────────────────────────────
-import { CourseController } from "./controllers/admin/courseController.js";
-
-// ── Admin: Exams ──────────────────────────────────────
-import { ExamController } from "./controllers/admin/examController.js";
-
-// ── Admin: Questions ──────────────────────────────────
-import { QuestionController } from "./controllers/admin/questionController.js";
-
-// ── Student: Exams & Results ──────────────────────────
-import { StudentExamController } from "./controllers/student/studentController.js";
-
-// ── Security ──────────────────────────────────────────
-import { authenticate } from "./Security/authenticate.js";
-import { requireRole } from "./Security/requireRole.js";
 import cors from "cors";
 
+import { UserRepository } from "./Repository/admin/adminUserRepositories.js";
+import { UserService } from "./services/admin/userService.js";
+import { AuthController } from "./controllers/auth/authController.js";
+import { UserController } from "./controllers/admin/userController.js";
+import { CourseController } from "./controllers/admin/courseController.js";
+import { ExamController } from "./controllers/admin/examController.js";
+import { QuestionController } from "./controllers/admin/questionController.js";
+import { StudentExamController } from "./controllers/student/studentController.js";
+import { authenticate } from "./Security/authenticate.js";
+import { requireRole } from "./Security/requireRole.js";
 
 const app = express();
+
 app.use(express.json());
+
+app.use(
+    cors({
+        origin: "http://localhost:5173",
+        credentials: true,
+    })
+);
+
 const userRepository = new UserRepository();
 const userService = new UserService();
 
-
-// Autoriser les requêtes venant du frontend Vite
-app.use(cors({
-  origin: "http://localhost:5173", // Adresse exacte de votre front Vite
-  credentials: true
-}));
-// 2. Passage du service au contrôleur
-
-// ── Instanciations ────────────────────────────────────
 const authController = new AuthController();
 const userController = new UserController(userService);
 const courseController = new CourseController();
@@ -47,61 +33,181 @@ const examController = new ExamController();
 const questionController = new QuestionController();
 const studentExamController = new StudentExamController();
 
-// ══════════════════════════════════════════════════════
-// Auth (Public)
-// ══════════════════════════════════════════════════════
+app.post(
+    "/api/auth/login",
+    authController.login
+);
 
-app.post("/api/auth/login", authController.login);
+app.get(
+    "/api/students",
+    authenticate,
+    requireRole("admin"),
+    userController.getAllStudents
+);
 
-// ══════════════════════════════════════════════════════
-// Administrateur uniquement
-// ══════════════════════════════════════════════════════
+app.post(
+    "/api/students",
+    authenticate,
+    requireRole("admin"),
+    userController.createStudent
+);
 
-// ── Étudiants ─────────────────────────────────────────
-app.get("/api/students", authenticate, requireRole("admin"), userController.getAllStudents);
-app.post("/api/students", authenticate, requireRole("admin"), userController.createStudent);
-app.put("/api/students/:id", authenticate, requireRole("admin"), userController.updateStudent);
-app.delete("/api/students/:id", authenticate, requireRole("admin"), userController.deactivateStudent); // RG-10
+app.put(
+    "/api/students/:id",
+    authenticate,
+    requireRole("admin"),
+    userController.updateStudent
+);
 
-// ── Cours ─────────────────────────────────────────────
-app.get("/api/courses", authenticate, requireRole("admin"), courseController.getAllCourses);
-app.post("/api/courses", authenticate, requireRole("admin"), courseController.createCourse);
-app.put("/api/courses/:id", authenticate, requireRole("admin"), courseController.updateCourse);
-app.delete("/api/courses/:id", authenticate, requireRole("admin"), courseController.deleteCourse); // RG-09
+app.delete(
+    "/api/students/:id",
+    authenticate,
+    requireRole("admin"),
+    userController.deactivateStudent
+);
 
-// ── Examens ───────────────────────────────────────────
-app.get("/api/exams", authenticate, requireRole("admin"), examController.getAllExams);
-app.post("/api/exams", authenticate, requireRole("admin"), examController.createExam);
-app.get("/api/exams/:id", authenticate, requireRole("admin"), examController.getExamById);
-app.put("/api/exams/:id", authenticate, requireRole("admin"), examController.updateExam);
-app.delete("/api/exams/:id", authenticate, requireRole("admin"), examController.deleteExam); // RG-09
-app.get("/api/exams/:id/results", authenticate, requireRole("admin"), examController.getExamResults);
+app.patch(
+    "/api/students/:id/activate",
+    authenticate,
+    requireRole("admin"),
+    userController.activateStudent
+);
 
-// ── Questions ─────────────────────────────────────────
-app.get("/api/exams/:id/questions", authenticate, requireRole("admin"), questionController.getQuestionsByExam);
-app.post("/api/exams/:id/questions", authenticate, requireRole("admin"), questionController.createQuestion); // RG-04
-app.put("/api/questions/:id", authenticate, requireRole("admin"), questionController.updateQuestion); // RG-08
-app.delete("/api/questions/:id", authenticate, requireRole("admin"), questionController.deleteQuestion); // RG-08
+app.get(
+    "/api/courses",
+    authenticate,
+    requireRole("admin"),
+    courseController.getAllCourses
+);
 
-// ══════════════════════════════════════════════════════
-// Étudiant uniquement
-// ══════════════════════════════════════════════════════
+app.post(
+    "/api/courses",
+    authenticate,
+    requireRole("admin"),
+    courseController.createCourse
+);
 
-app.get("/api/my/exams", authenticate, requireRole("student"), studentExamController.getAvailableExams);
-app.get("/api/my/exams/:id", authenticate, requireRole("student"), studentExamController.getExamToTake); // RG-07
-app.post("/api/my/exams/:id/submit", authenticate, requireRole("student"), studentExamController.submitExam); // RG-06
-app.get("/api/my/results/:attemptId/correction", authenticate, requireRole("student"), studentExamController.getCorrectionForAttempt);
+app.put(
+    "/api/courses/:id",
+    authenticate,
+    requireRole("admin"),
+    courseController.updateCourse
+);
 
-// ══════════════════════════════════════════════════════
+app.delete(
+    "/api/courses/:id",
+    authenticate,
+    requireRole("admin"),
+    courseController.deleteCourse
+);
 
+app.get(
+    "/api/exams",
+    authenticate,
+    requireRole("admin"),
+    examController.getAllExams
+);
 
-//test
+app.post(
+    "/api/exams",
+    authenticate,
+    requireRole("admin"),
+    examController.createExam
+);
+
+app.get(
+    "/api/exams/:id",
+    authenticate,
+    requireRole("admin"),
+    examController.getExamById
+);
+
+app.put(
+    "/api/exams/:id",
+    authenticate,
+    requireRole("admin"),
+    examController.updateExam
+);
+
+app.delete(
+    "/api/exams/:id",
+    authenticate,
+    requireRole("admin"),
+    examController.deleteExam
+);
+
+app.get(
+    "/api/exams/:id/results",
+    authenticate,
+    requireRole("admin"),
+    examController.getExamResults
+);
+
+app.get(
+    "/api/exams/:id/questions",
+    authenticate,
+    requireRole("admin"),
+    questionController.getQuestionsByExam
+);
+
+app.post(
+    "/api/exams/:id/questions",
+    authenticate,
+    requireRole("admin"),
+    questionController.createQuestion
+);
+
+app.put(
+    "/api/questions/:id",
+    authenticate,
+    requireRole("admin"),
+    questionController.updateQuestion
+);
+
+app.delete(
+    "/api/questions/:id",
+    authenticate,
+    requireRole("admin"),
+    questionController.deleteQuestion
+);
+
+app.get(
+    "/api/my/exams",
+    authenticate,
+    requireRole("student"),
+    studentExamController.getAvailableExams
+);
+
+app.get(
+    "/api/my/exams/:id",
+    authenticate,
+    requireRole("student"),
+    studentExamController.getExamToTake
+);
+
+app.post(
+    "/api/my/exams/:id/submit",
+    authenticate,
+    requireRole("student"),
+    studentExamController.submitExam
+);
+
+app.get(
+    "/api/my/results/:attemptId/correction",
+    authenticate,
+    requireRole("student"),
+    studentExamController.getCorrectionForAttempt
+);
+
 app.get("/api/test", (req, res) => {
-  res.json({ message: "Le Front et le Back communiquent parfaitement !" });
+    res.json({
+        message: "Le Front et le Back communiquent parfaitement !",
+    });
 });
-    
+
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {    
+
+app.listen(PORT, () => {
     console.log(`Serveur démarré sur http://localhost:${PORT}`);
 });
 
