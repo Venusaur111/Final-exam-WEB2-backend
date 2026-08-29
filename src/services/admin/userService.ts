@@ -71,6 +71,15 @@ export class UserService {
         });
         if (!updated) throw new Error("Échec de la mise à jour.");
 
+        // Handle activation or deactivation if isActive is provided in the update payload
+        if (typeof data.isActive === "boolean") {
+            if (data.isActive) {
+                await this.userRepo.activate(id);
+            } else {
+                await this.userRepo.deactivate(id);
+            }
+        }
+
         if (data.password) {
             await this.updatePassword(id, data.password);
         }
@@ -87,5 +96,10 @@ export class UserService {
     async deactivateStudent(id: string): Promise<void> {
         await this.getStudentById(id);
         await this.userRepo.deactivate(id);
+    }
+
+    async activateStudent(id: string): Promise<void> {
+        await this.getStudentById(id);
+        await this.userRepo.activate(id);
     }
 }

@@ -78,6 +78,12 @@ app.delete(
     userController.deactivateStudent
 );
 
+app.put(
+    "/students/:id/activate",
+    authenticate,
+    requireRole("admin"),
+    userController.activateStudent);
+
 app.get(
     "/api/courses",
     authenticate,

@@ -18,9 +18,10 @@ export interface CreateStudentInput {
     email: string;
     passwordHash: string; // déjà hashé en amont par le Service (bcrypt)
 }
- 
+
 export interface UpdateStudentInput {
     name?: string;
     email?: string;
+    isActive?: boolean;
 }
  
