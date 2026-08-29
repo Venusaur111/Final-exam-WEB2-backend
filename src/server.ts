@@ -36,6 +36,7 @@ app.get("/api/students", authenticate, requireRole("admin"), userController.getA
 app.post("/api/students", authenticate, requireRole("admin"), userController.createStudent);
 app.put("/api/students/:id", authenticate, requireRole("admin"), userController.updateStudent);
 app.delete("/api/students/:id", authenticate, requireRole("admin"), userController.deactivateStudent);
+app.put("/students/:id/activate", authenticate, requireRole("admin"), userController.activateStudent);
 
 app.get("/api/courses", authenticate, requireRole("admin"), courseController.getAllCourses);
 app.post("/api/courses", authenticate, requireRole("admin"), courseController.createCourse);
