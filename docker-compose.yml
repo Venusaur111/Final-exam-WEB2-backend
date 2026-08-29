@@ -8,17 +8,17 @@ services:
       - DB_HOST=postgres
       - DB_PORT=5432
       - DB_USER=postgres
-      - DB_PASSWORD=postgres
-      - DB_NAME=exam_manager
+      - DB_PASSWORD=123456
+      - DB_NAME=examhub
     depends_on:
       - postgres
 
   postgres:
     image: postgres:15-alpine
     environment:
-      POSTGRES_DB: exam_manager
+      POSTGRES_DB: examhub
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_PASSWORD: 123456
     ports:
       - "5432:5432"
     volumes:

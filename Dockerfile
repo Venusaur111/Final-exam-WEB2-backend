@@ -7,4 +7,4 @@ RUN pnpm build
 LABEL authors="Sam & Aina"
 EXPOSE 3000
 
-ENTRYPOINT ["node", "dist/index.js"]
+ENTRYPOINT ["node", "dist/server.ts"]
