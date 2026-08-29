@@ -73,4 +73,11 @@ export class UserRepository {
             [id]
         );
     }
+
+    async activate(id: string): Promise<void> {
+        await pool.query(
+            `UPDATE users SET is_active = TRUE WHERE id = $1 AND role = 'student'`,
+            [id]
+        );
+    }
 }

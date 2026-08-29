@@ -61,4 +61,18 @@ export class UserController {
             res.status(500).json({ message: error.message });
         }
     };
+
+    public activateStudent = async (req: Request<{ id: string }>, res: Response): Promise<void> => {
+        try {
+            const { id } = req.params;
+            await this.userService.activateStudent(id);
+            res.status(200).json({ message: "Compte étudiant activé avec succès." });
+        } catch (error: any) {
+            if (error.message === "Étudiant non trouvé.") {
+                res.status(404).json({ message: error.message });
+                return;
+            }
+            res.status(500).json({ message: error.message });
+        }
+    };
 }
