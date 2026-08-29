@@ -79,7 +79,7 @@ app.delete(
 );
 
 app.put(
-    "/students/:id/activate",
+    "/api/students/:id/activate",
     authenticate,
     requireRole("admin"),
     userController.activateStudent);
